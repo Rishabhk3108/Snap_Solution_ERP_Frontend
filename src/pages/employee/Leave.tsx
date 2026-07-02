@@ -22,7 +22,7 @@ export default function Leave() {
   const [showForm, setShowForm] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [leaveType, setLeaveType] = useState('Casual Leave');
+  const [leaveType, setLeaveType] = useState<'Casual Leave' | 'Sick Leave' | 'LWP'>('Casual Leave');
   const [reason, setReason] = useState('');
   const [msg, setMsg] = useState('');
   const [filter, setFilter] = useState<'All' | 'Pending' | 'Approved' | 'Rejected'>('All');

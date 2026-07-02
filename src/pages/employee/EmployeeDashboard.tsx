@@ -126,7 +126,6 @@ export default function EmployeeDashboard() {
   const pendingLeaves = (leaves as any[]).filter(l => l.status === 'Pending').length;
   const approvedLeaves = (leaves as any[]).filter(l => l.status === 'Approved').length;
   const currentStatus = (attStatus as any)?.status ?? 'A';
-  const isCheckedIn = ['P', 'H', 'NC'].includes(currentStatus);
   const recentAttendance = (attList as any[]).slice(-5).reverse();
 
   return (

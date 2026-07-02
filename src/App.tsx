@@ -13,7 +13,6 @@ import Attendance from './pages/attendance/Attendance';
 import Profile from './pages/profile/Profile';
 
 // Admin-only pages
-import AdminDashboard from './pages/admin/AdminDashboard';
 import LeaveApprovals from './pages/admin/LeaveApprovals';
 import Payroll from './pages/admin/Payroll';
 import AdvancePayments from './pages/admin/AdvancePayments';

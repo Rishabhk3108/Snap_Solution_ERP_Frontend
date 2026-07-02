@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -33,7 +34,7 @@ const icons = {
   megaphone: () => I(["M3 11l19-9-9 19-2-8-8-2z"]),
 };
 
-interface NavGroup { heading: string; items: { to: string; label: string; icon: () => JSX.Element }[] }
+interface NavGroup { heading: string; items: { to: string; label: string; icon: () => ReactElement }[] }
 
 const ADMIN_NAV: NavGroup[] = [
   {
@@ -141,7 +142,7 @@ const EMPLOYEE_NAV: NavGroup[] = [
   },
 ];
 
-function NavItem({ to, label, icon: IconComp }: { to: string; label: string; icon: () => JSX.Element }) {
+function NavItem({ to, label, icon: IconComp }: { to: string; label: string; icon: () => ReactElement }) {
   return (
     <NavLink
       to={to}
