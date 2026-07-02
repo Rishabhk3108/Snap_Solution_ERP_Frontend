@@ -159,7 +159,7 @@ export default function Leave() {
               </div>
               <div style={{ marginBottom: 16 }}>
                 <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5 }}>Leave Type *</label>
-                <select value={leaveType} onChange={e => setLeaveType(e.target.value)}
+                <select value={leaveType} onChange={e => setLeaveType(e.target.value as 'Casual Leave' | 'Sick Leave' | 'LWP')}
                   style={{ width: '100%', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 7, padding: '9px 12px', color: '#111827', fontSize: 13 }}>
                   <option value="Casual Leave">Casual Leave</option>
                   <option value="Sick Leave">Sick Leave</option>
