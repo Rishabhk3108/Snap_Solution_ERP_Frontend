@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --color-snap-bg: #F3F4F6;
+  --color-snap-surface: #FFFFFF;
+  --color-snap-border: #E5E7EB;
+  --color-snap-gold: #f4b400;
+  --color-snap-gold-hover: #ffc930;
+  --color-snap-text: #111827;
+  --color-snap-muted: #6B7280;
+  --color-snap-danger: #ef4444;
+  --color-snap-success: #22c55e;
+  --color-snap-warning: #f59e0b;
+  --color-snap-info: #3b82f6;
+
+  --font-family-sans: "Plus Jakarta Sans", "Archivo", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #F3F4F6;
+  color: #111827;
+  font-family: "Plus Jakarta Sans", "Archivo", -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+}
+
+#root {
+  width: 100%;
+  text-align: left;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F3F4F6;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f4b400;
+}
