@@ -11,6 +11,7 @@ export interface User {
   startDate?: string;
   endDate?: string;
   remark?: string;
+  onboarding_complete?: boolean;
 }
 
 export interface AuthPayload {

@@ -8,6 +8,7 @@ interface AuthContextValue {
   login: (token: string, user: User) => void;
   logout: () => void;
   loading: boolean;
+  completeOnboarding: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -50,8 +51,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user');
   };
 
+  const completeOnboarding = () => {
+    if (!user) return;
+    const updated = { ...user, onboarding_complete: true };
+    setUser(updated);
+    localStorage.setItem('user', JSON.stringify(updated));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, loading, completeOnboarding }}>
       {children}
     </AuthContext.Provider>
   );
