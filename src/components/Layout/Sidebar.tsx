@@ -124,8 +124,6 @@ const EMPLOYEE_NAV: NavGroup[] = [
     items: [
       { to: '/my-attendance', label: 'My Attendance', icon: icons.clock },
       { to: '/my-salary', label: 'My Salary', icon: icons.dollar },
-      { to: '/leave', label: 'Leave', icon: icons.calendar },
-      { to: '/expenses', label: 'Expenses', icon: icons.receipt },
     ],
   },
   {
