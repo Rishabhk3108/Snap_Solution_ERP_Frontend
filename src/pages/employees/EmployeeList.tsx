@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Layout/Header';
-import { getActiveUsers, getAllUsers, getExitedUsers, deleteUser, createUser, activateUser } from '../../api/users';
+import { getActiveUsers, getAllUsers, getExitedUsers, deleteUser, createUser, activateUser, updateUser } from '../../api/users';
 import { updatePersonalInfo } from '../../api/personalInfo';
 import { useAuth } from '../../contexts/AuthContext';
 import type { User } from '../../types';
@@ -55,6 +55,16 @@ export default function EmployeeList() {
   const [personalDetails, setPersonalDetails] = useState({ mobile: '', email: '', dob: '', gender: '', city: '' });
   const [addError, setAddError] = useState('');
 
+  const [editEmp, setEditEmp] = useState<User | null>(null);
+  const [editForm, setEditForm] = useState({ fullname: '', jobTitle: '', role: 'ROLE_EMPLOYEE', active: 1, reportid: '' });
+  const [editError, setEditError] = useState('');
+
+  const openEdit = (u: User) => {
+    setEditEmp(u);
+    setEditForm({ fullname: u.fullname || '', jobTitle: u.jobTitle || '', role: u.role || 'ROLE_EMPLOYEE', active: (u.active as number) ?? 1, reportid: u.reportid || '' });
+    setEditError('');
+  };
+
   const { data: activeUsers = [], isLoading: loadingActive } = useQuery({
     queryKey: ['users', 'active'], queryFn: getActiveUsers, retry: false,
   });
@@ -96,6 +106,18 @@ export default function EmployeeList() {
       setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '' });
     },
     onError: (e: any) => setAddError(e.response?.data?.error || 'Failed to create employee'),
+  });
+
+  const editMut = useMutation({
+    mutationFn: () => updateUser(editEmp!.id, {
+      fullname: editForm.fullname,
+      jobTitle: editForm.jobTitle,
+      role: editForm.role,
+      active: editForm.active,
+      reportid: editForm.reportid || undefined,
+    }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['users'] }); setEditEmp(null); setEditError(''); },
+    onError: (e: any) => setEditError(e.response?.data?.error || 'Failed to update employee'),
   });
 
   const rows: User[] = (tab === 'active' ? activeUsers : tab === 'exited' ? exitedUsers : allUsers).filter(u =>
@@ -216,6 +238,14 @@ export default function EmployeeList() {
                             >
                               View
                             </button>
+                            {isAdmin && (
+                              <button
+                                onClick={() => openEdit(u)}
+                                style={{ padding: '5px 10px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 6, color: '#6366f1', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                              >
+                                Edit
+                              </button>
+                            )}
                             {isAdmin && !u.active && (
                               <button
                                 onClick={() => activateMut.mutate(u.id)}
@@ -244,6 +274,56 @@ export default function EmployeeList() {
           )}
         </div>
       </div>
+
+      {editEmp && (
+        <Modal title={`Edit Employee — ${editEmp.fullname}`} onClose={() => { setEditEmp(null); setEditError(''); }}>
+          {editError && <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, padding: '10px 14px', color: '#dc2626', fontSize: 13, marginBottom: 16 }}>{editError}</div>}
+          <form onSubmit={e => { e.preventDefault(); setEditError(''); editMut.mutate(); }}>
+            <InputField label="Full Name" value={editForm.fullname} onChange={v => setEditForm(p => ({ ...p, fullname: v }))} required />
+            <InputField label="Job Title" value={editForm.jobTitle} onChange={v => setEditForm(p => ({ ...p, jobTitle: v }))} />
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>Role</label>
+              <select
+                value={editForm.role}
+                onChange={e => setEditForm(p => ({ ...p, role: e.target.value }))}
+                style={{ width: '100%', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px', color: '#111827', fontSize: 14 }}
+              >
+                <option value="ROLE_EMPLOYEE">Employee</option>
+                <option value="ROLE_MANAGER">Manager</option>
+                <option value="ROLE_ADMIN">Admin</option>
+              </select>
+            </div>
+            <InputField label="Reports To (User ID)" value={String(editForm.reportid)} onChange={v => setEditForm(p => ({ ...p, reportid: v }))} />
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 8, fontWeight: 500 }}>Status</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {[{ label: 'Active', val: 1 }, { label: 'Inactive', val: 0 }].map(opt => (
+                  <button
+                    key={opt.val}
+                    type="button"
+                    onClick={() => setEditForm(p => ({ ...p, active: opt.val }))}
+                    style={{
+                      flex: 1, padding: '8px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                      border: `1px solid ${editForm.active === opt.val ? (opt.val ? '#16a34a' : '#dc2626') : '#E5E7EB'}`,
+                      background: editForm.active === opt.val ? (opt.val ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.08)') : '#FFFFFF',
+                      color: editForm.active === opt.val ? (opt.val ? '#16a34a' : '#dc2626') : '#6B7280',
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={editMut.isPending}
+              style={{ width: '100%', background: '#6366f1', color: '#FFFFFF', border: 'none', borderRadius: 8, padding: '10px 0', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+            >
+              {editMut.isPending ? 'Saving…' : 'Save Changes'}
+            </button>
+          </form>
+        </Modal>
+      )}
 
       {showAdd && (
         <Modal title="Add New Employee" onClose={() => { setShowAdd(false); setAddError(''); setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '' }); }}>
