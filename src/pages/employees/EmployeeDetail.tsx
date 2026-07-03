@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Header from '../../components/Layout/Header';
-import { getUser, changePassword } from '../../api/users';
+import { getUser, changePassword, adminResetPassword } from '../../api/users';
 import { getPersonalInfoByUser, updatePersonalInfo } from '../../api/personalInfo';
 import { getFinancialInfoByUser, updateFinancialInfo } from '../../api/financialInfo';
 import { getAttendanceList, getDaysWorked } from '../../api/attendance';
@@ -128,6 +128,16 @@ export default function EmployeeDetail() {
     onError: (e: any) => setPassMsg(e.response?.data?.error || 'Failed to change password'),
   });
 
+  const [resetPass, setResetPass] = useState('');
+  const [resetConfirm, setResetConfirm] = useState('');
+  const [resetMsg, setResetMsg] = useState('');
+
+  const resetPassMut = useMutation({
+    mutationFn: () => adminResetPassword(empId, resetPass),
+    onSuccess: () => { setResetMsg('Password reset successfully!'); setResetPass(''); setResetConfirm(''); setTimeout(() => setResetMsg(''), 3000); },
+    onError: (e: any) => setResetMsg(e.response?.data?.error || 'Failed to reset password'),
+  });
+
   const tabs: { key: Tab; label: string }[] = [
     { key: 'overview', label: 'Overview' },
     { key: 'personal', label: 'Personal Info' },
@@ -230,6 +240,38 @@ export default function EmployeeDetail() {
                 <button onClick={() => changePassMut.mutate()} disabled={!oldPass || !newPass}
                   style={{ background: '#f4b400', color: '#1f1f1f', border: 'none', borderRadius: 6, padding: '8px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
                   Update Password
+                </button>
+              </Section>
+            )}
+            {isAdmin && authUser?.id !== empId && (
+              <Section title="Reset Password">
+                <p style={{ margin: '0 0 14px', fontSize: 13, color: '#6B7280' }}>
+                  Set a new password for <strong>{emp.fullname}</strong> without requiring their current password.
+                </p>
+                {resetMsg && (
+                  <div style={{ background: resetMsg.includes('success') ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${resetMsg.includes('success') ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`, borderRadius: 8, padding: '8px 12px', color: resetMsg.includes('success') ? '#16a34a' : '#dc2626', fontSize: 13, marginBottom: 12 }}>
+                    {resetMsg}
+                  </div>
+                )}
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 4, fontWeight: 500 }}>New Password</label>
+                  <input type="password" value={resetPass} onChange={e => setResetPass(e.target.value)} style={inputSt}
+                    onFocus={e => e.target.style.borderColor = '#6366f1'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
+                </div>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 4, fontWeight: 500 }}>Confirm Password</label>
+                  <input type="password" value={resetConfirm} onChange={e => setResetConfirm(e.target.value)} style={{ ...inputSt, borderColor: resetConfirm && resetConfirm !== resetPass ? '#dc2626' : '#E5E7EB' }}
+                    onFocus={e => e.target.style.borderColor = '#6366f1'} onBlur={e => e.target.style.borderColor = resetConfirm && resetConfirm !== resetPass ? '#dc2626' : '#E5E7EB'} />
+                  {resetConfirm && resetConfirm !== resetPass && (
+                    <p style={{ margin: '4px 0 0', fontSize: 11, color: '#dc2626' }}>Passwords do not match</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => { setResetMsg(''); resetPassMut.mutate(); }}
+                  disabled={!resetPass || resetPass !== resetConfirm || resetPassMut.isPending}
+                  style={{ background: '#6366f1', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: (!resetPass || resetPass !== resetConfirm) ? 0.5 : 1 }}
+                >
+                  {resetPassMut.isPending ? 'Resetting…' : 'Reset Password'}
                 </button>
               </Section>
             )}

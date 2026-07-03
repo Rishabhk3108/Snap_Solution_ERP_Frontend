@@ -56,6 +56,11 @@ export const changePassword = async (id: number, oldPassword: string, newPasswor
   return data;
 };
 
+export const adminResetPassword = async (id: number, password: string) => {
+  const { data } = await client.post('/users/emp-password-update', { id, password });
+  return data;
+};
+
 export const updateEndDate = async (id: number, endDate: string, remark?: string) => {
   const { data } = await client.put(`/users/updateEndDate/${id}`, { endDate, remark });
   return data;
