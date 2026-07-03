@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Layout/Header';
 import { getActiveUsers, getAllUsers, getExitedUsers, deleteUser, createUser, activateUser } from '../../api/users';
+import { updatePersonalInfo } from '../../api/personalInfo';
 import { useAuth } from '../../contexts/AuthContext';
 import type { User } from '../../types';
 
@@ -51,6 +52,7 @@ export default function EmployeeList() {
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [newEmp, setNewEmp] = useState({ fullname: '', username: '', password: '', jobTitle: '', role: 'ROLE_EMPLOYEE' });
+  const [personalDetails, setPersonalDetails] = useState({ mobile: '', email: '', dob: '', gender: '', city: '' });
   const [addError, setAddError] = useState('');
 
   const { data: activeUsers = [], isLoading: loadingActive } = useQuery({
@@ -75,7 +77,24 @@ export default function EmployeeList() {
 
   const createMut = useMutation({
     mutationFn: createUser,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['users'] }); setShowAdd(false); setNewEmp({ fullname: '', username: '', password: '', jobTitle: '', role: 'ROLE_EMPLOYEE' }); },
+    onSuccess: async (data: any) => {
+      const { mobile, email, dob, gender, city } = personalDetails;
+      if ((mobile || email || dob || gender || city) && data?.id) {
+        try {
+          await updatePersonalInfo(data.id, {
+            mobile: mobile || undefined,
+            emailAddress: email || undefined,
+            dateOfBirth: dob || undefined,
+            gender: gender || undefined,
+            city: city || undefined,
+          });
+        } catch {}
+      }
+      qc.invalidateQueries({ queryKey: ['users'] });
+      setShowAdd(false);
+      setNewEmp({ fullname: '', username: '', password: '', jobTitle: '', role: 'ROLE_EMPLOYEE' });
+      setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '' });
+    },
     onError: (e: any) => setAddError(e.response?.data?.error || 'Failed to create employee'),
   });
 
@@ -227,7 +246,7 @@ export default function EmployeeList() {
       </div>
 
       {showAdd && (
-        <Modal title="Add New Employee" onClose={() => setShowAdd(false)}>
+        <Modal title="Add New Employee" onClose={() => { setShowAdd(false); setAddError(''); setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '' }); }}>
           {addError && <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, padding: '10px 14px', color: '#dc2626', fontSize: 13, marginBottom: 16 }}>{addError}</div>}
           <form onSubmit={e => { e.preventDefault(); setAddError(''); createMut.mutate(newEmp); }}>
             <InputField label="Full Name" value={newEmp.fullname} onChange={v => setNewEmp(p => ({ ...p, fullname: v }))} required />
@@ -246,6 +265,32 @@ export default function EmployeeList() {
                 <option value="ROLE_ADMIN">Admin</option>
               </select>
             </div>
+            {/* Personal Details — optional, fills on behalf of employee */}
+            <div style={{ margin: '8px 0 14px', padding: '14px 16px', background: '#F9FAFB', borderRadius: 10, border: '1px solid #E5E7EB' }}>
+              <p style={{ margin: '0 0 12px', fontSize: 12, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                Personal Details <span style={{ fontWeight: 400, textTransform: 'none', color: '#9CA3AF' }}>(optional — skip if employee will fill in app)</span>
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <InputField label="Mobile" value={personalDetails.mobile} onChange={v => setPersonalDetails(p => ({ ...p, mobile: v }))} />
+                <InputField label="Personal Email" value={personalDetails.email} onChange={v => setPersonalDetails(p => ({ ...p, email: v }))} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <InputField label="Date of Birth (YYYY-MM-DD)" value={personalDetails.dob} onChange={v => setPersonalDetails(p => ({ ...p, dob: v }))} />
+                <InputField label="City" value={personalDetails.city} onChange={v => setPersonalDetails(p => ({ ...p, city: v }))} />
+              </div>
+              <div style={{ marginBottom: 4 }}>
+                <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>Gender</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {['Male', 'Female', 'Other'].map(g => (
+                    <button key={g} type="button" onClick={() => setPersonalDetails(p => ({ ...p, gender: p.gender === g ? '' : g }))}
+                      style={{ flex: 1, padding: '7px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: `1px solid ${personalDetails.gender === g ? '#f4b400' : '#E5E7EB'}`, background: personalDetails.gender === g ? 'rgba(244,180,0,0.12)' : '#FFFFFF', color: personalDetails.gender === g ? '#111827' : '#6B7280' }}>
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={createMut.isPending}
