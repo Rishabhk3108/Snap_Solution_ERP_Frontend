@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Header from '../../components/Layout/Header';
 import { addAdvancePayment, getAdvancePayments } from '../../api/advancePayments';
+import { getActiveUsers } from '../../api/users';
 
 const inputStyle = {
   width: '100%', background: '#F9FAFB', border: '1px solid #E5E7EB',
@@ -23,6 +24,8 @@ export default function AdvancePayments() {
     queryFn: getAdvancePayments,
     retry: false,
   });
+
+  const { data: activeUsers = [] } = useQuery({ queryKey: ['users', 'active'], queryFn: getActiveUsers, retry: false });
 
   const addMut = useMutation({
     mutationFn: () => addAdvancePayment({ empid: Number(empid), amount: Number(amount), date, note }),
@@ -77,9 +80,13 @@ export default function AdvancePayments() {
             <form onSubmit={e => { e.preventDefault(); addMut.mutate(); }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 14 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5, fontWeight: 500 }}>Employee ID *</label>
-                  <input value={empid} onChange={e => setEmpid(e.target.value)} required placeholder="Employee ID" style={inputStyle}
-                    onFocus={e => e.target.style.borderColor = '#f4b400'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
+                  <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5, fontWeight: 500 }}>Employee *</label>
+                  <select value={empid} onChange={e => setEmpid(e.target.value)} required style={inputStyle}>
+                    <option value="">Select employee…</option>
+                    {(activeUsers as any[]).map((u: any) => (
+                      <option key={u.id} value={u.id}>{u.fullname} ({u.id})</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5, fontWeight: 500 }}>Amount (₹) *</label>

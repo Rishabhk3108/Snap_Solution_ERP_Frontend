@@ -91,6 +91,7 @@ export default function Attendance() {
   });
 
   const records: any[] = Array.isArray(filterQuery.data) ? filterQuery.data : [];
+  const empMap = Object.fromEntries((activeUsers as any[]).map((u: any) => [u.id, u.fullname]));
 
   const presentPct = todaySummary?.total > 0
     ? Math.round((todaySummary.present / todaySummary.total) * 100)
@@ -143,9 +144,9 @@ export default function Attendance() {
             {isAdminOrManager && (
               <div>
                 <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 4, fontWeight: 500 }}>Employee</label>
-                <select value={empFilter} onChange={e => setEmpFilter(e.target.value)} style={{ ...inputStyle, minWidth: 180 }}>
+                <select value={empFilter} onChange={e => setEmpFilter(e.target.value)} style={{ ...inputStyle, minWidth: 220 }}>
                   <option value="">All Employees</option>
-                  {activeUsers.map(u => <option key={u.id} value={String(u.id)}>{u.fullname}</option>)}
+                  {(activeUsers as any[]).map((u: any) => <option key={u.id} value={String(u.id)}>{u.fullname} ({u.id})</option>)}
                 </select>
               </div>
             )}
@@ -175,9 +176,9 @@ export default function Attendance() {
               {records.length > 0 && (
                 <button
                   onClick={() => {
-                    const headers = ['ID', 'Employee ID', 'Date', 'Start Time', 'End Time', 'Hours', 'OT Hours', 'Location', 'Status'];
+                    const headers = ['ID', 'Employee', 'Emp ID', 'Date', 'Start Time', 'End Time', 'Hours', 'OT Hours', 'Location', 'Status'];
                     const rows = records.map((a: any) => [
-                      a.id ?? '', a.empid ?? '', a.date ?? '',
+                      a.id ?? '', empMap[a.empid] ?? '', a.empid ?? '', a.date ?? '',
                       a.startTime ?? a.start_time ?? '',
                       a.endTime ?? a.end_time ?? '',
                       a.numberOfHours ?? a.number_of_hours ?? calcHours(a.startTime ?? a.start_time, a.endTime ?? a.end_time),
@@ -207,7 +208,7 @@ export default function Attendance() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-                    {['#', 'Employee ID', 'Date', 'Start', 'End', 'Hours', 'OT', 'Location', 'Status', ...(isAdminOrManager ? [''] : [])].map((h, i) => (
+                    {['#', 'Employee', 'Date', 'Start', 'End', 'Hours', 'OT', 'Location', 'Status', ...(isAdminOrManager ? [''] : [])].map((h, i) => (
                       <th key={i} style={{ textAlign: 'left', padding: '10px 14px', fontSize: 11, color: '#6B7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>{h}</th>
                     ))}
                   </tr>
@@ -218,7 +219,10 @@ export default function Attendance() {
                       onMouseEnter={e => (e.currentTarget as HTMLTableRowElement).style.background = '#F9FAFB'}
                       onMouseLeave={e => (e.currentTarget as HTMLTableRowElement).style.background = 'transparent'}>
                       <td style={{ padding: '10px 14px', fontSize: 12, color: '#9CA3AF' }}>{a.id}</td>
-                      <td style={{ padding: '10px 14px', fontSize: 13, color: '#6B7280' }}>{a.empid}</td>
+                      <td style={{ padding: '10px 14px' }}>
+                        <div style={{ fontSize: 13, color: '#111827', fontWeight: 500 }}>{empMap[a.empid] ?? `Employee #${a.empid}`}</div>
+                        <div style={{ fontSize: 11, color: '#9CA3AF' }}>ID: {a.empid}</div>
+                      </td>
                       <td style={{ padding: '10px 14px', fontSize: 13, color: '#374151' }}>{a.date}</td>
                       <td style={{ padding: '10px 14px', fontSize: 13, color: '#6B7280' }}>{formatTime(a.startTime ?? a.start_time)}</td>
                       <td style={{ padding: '10px 14px', fontSize: 13, color: (a.endTime ?? a.end_time) ? '#6B7280' : '#d97706' }}>{formatTime(a.endTime ?? a.end_time)}</td>
@@ -265,7 +269,11 @@ export default function Attendance() {
             </div>
             <div style={{ padding: 24 }}>
               <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8, padding: '10px 14px', marginBottom: 18 }}>
-                <p style={{ margin: 0, fontSize: 12, color: '#6B7280' }}>Employee ID <span style={{ color: '#111827', fontWeight: 600 }}>#{editRecord.empid}</span> · Date <span style={{ color: '#111827', fontWeight: 600 }}>{editRecord.date}</span></p>
+                <p style={{ margin: 0, fontSize: 12, color: '#6B7280' }}>
+                  <span style={{ color: '#111827', fontWeight: 600 }}>{empMap[editRecord.empid] ?? `Employee #${editRecord.empid}`}</span>
+                  <span style={{ color: '#9CA3AF' }}> (ID: {editRecord.empid})</span>
+                  {' · '}Date <span style={{ color: '#111827', fontWeight: 600 }}>{editRecord.date}</span>
+                </p>
               </div>
               {editMsg && (
                 <div style={{ background: editMsg.includes('success') ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${editMsg.includes('success') ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`, borderRadius: 8, padding: '9px 14px', color: editMsg.includes('success') ? '#16a34a' : '#dc2626', fontSize: 13, marginBottom: 14 }}>
@@ -314,7 +322,7 @@ export default function Attendance() {
                   <select value={newAtt.empid} onChange={e => setNewAtt(p => ({ ...p, empid: e.target.value }))} required
                     style={{ width: '100%', ...inputStyle }}>
                     <option value="">Select employee…</option>
-                    {activeUsers.map(u => <option key={u.id} value={u.id}>{u.fullname}</option>)}
+                    {(activeUsers as any[]).map((u: any) => <option key={u.id} value={u.id}>{u.fullname} ({u.id})</option>)}
                   </select>
                 </div>
                 {[
