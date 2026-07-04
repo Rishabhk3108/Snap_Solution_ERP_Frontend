@@ -33,27 +33,6 @@ function Field({ label, value }: { label: string; value?: string | number | null
   );
 }
 
-function EditableField({ label, value, onSave }: { label: string; value?: string | null; onSave: (v: string) => void }) {
-  const [editing, setEditing] = useState(false);
-  const [val, setVal] = useState(value || '');
-  return (
-    <div style={{ marginBottom: 12 }}>
-      <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 2, fontWeight: 500 }}>{label}</div>
-      {editing ? (
-        <div style={{ display: 'flex', gap: 6 }}>
-          <input value={val} onChange={e => setVal(e.target.value)} style={{ flex: 1, ...inputSt }} />
-          <button onClick={() => { onSave(val); setEditing(false); }} style={{ padding: '6px 10px', background: '#f4b400', border: 'none', borderRadius: 6, color: '#1f1f1f', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Save</button>
-          <button onClick={() => setEditing(false)} style={{ padding: '6px 10px', background: '#F3F4F6', border: '1px solid #E5E7EB', borderRadius: 6, color: '#6B7280', cursor: 'pointer', fontSize: 13 }}>×</button>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 14, color: val ? '#111827' : '#9CA3AF' }}>{val || '—'}</span>
-          <button onClick={() => setEditing(true)} style={{ padding: '2px 8px', background: 'rgba(244,180,0,0.08)', border: '1px solid rgba(244,180,0,0.25)', borderRadius: 4, color: '#d97706', fontSize: 11, cursor: 'pointer' }}>Edit</button>
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function EmployeeDetail() {
   const { id } = useParams<{ id: string }>();
@@ -459,7 +438,7 @@ export default function EmployeeDetail() {
                 <div key={key} style={{ marginBottom: 12 }}>
                   <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 3, fontWeight: 500 }}>{label}</div>
                   {financialEditing
-                    ? <input type={type} value={ff[key]} onChange={e => setFinancialForm(f => ({ ...f, [key]: e.target.value }))} style={{ width: '100%', ...inputSt }} />
+                    ? <input type={type} value={ff[key]} onChange={e => setFinancialForm(f => ({ ...f, [key]: e.target.value }))} style={{ ...inputSt }} />
                     : <div style={{ fontSize: 14, color: (fin as any)?.[key] ? '#111827' : '#9CA3AF' }}>{(fin as any)?.[key] ?? '—'}</div>}
                 </div>
               );
