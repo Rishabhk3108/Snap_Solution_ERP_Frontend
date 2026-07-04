@@ -80,7 +80,7 @@ export default function EmployeeDetail() {
 
   const { data: emp, isLoading: loadingEmp } = useQuery({ queryKey: ['user', empId], queryFn: () => getUser(empId) });
   const { data: personal } = useQuery({ queryKey: ['personal', empId], queryFn: () => getPersonalInfoByUser(empId), retry: false });
-  const { data: financial } = useQuery({ queryKey: ['financial', empId], queryFn: () => getFinancialInfoByUser(empId), retry: false, enabled: isAdmin });
+  const { data: financial } = useQuery({ queryKey: ['financial', empId], queryFn: () => getFinancialInfoByUser(empId), retry: false });
   const { data: attendance } = useQuery({ queryKey: ['attendance', 'list', empId, attYear, attMonth], queryFn: () => getAttendanceList(empId, attYear, attMonth), enabled: tab === 'attendance' });
   const { data: daysWorked } = useQuery({ queryKey: ['daysWorked', empId, attYear, attMonth], queryFn: () => getDaysWorked(empId, attYear, attMonth), enabled: tab === 'attendance' });
 
@@ -144,7 +144,7 @@ export default function EmployeeDetail() {
   const tabs: { key: Tab; label: string }[] = [
     { key: 'overview', label: 'Overview' },
     { key: 'personal', label: 'Personal Info' },
-    ...(isAdmin ? [{ key: 'financial' as Tab, label: 'Financial' }] : []),
+    { key: 'financial' as Tab, label: 'Financial' },
     { key: 'attendance', label: 'Attendance' },
   ];
 
@@ -380,13 +380,19 @@ export default function EmployeeDetail() {
           )
         )}
 
-        {tab === 'financial' && isAdmin && (
+        {tab === 'financial' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             <Section title="Salary Details">
               <Field label="Employment Type" value={financial?.employmentType} />
-              <EditableField label="Basic Salary" value={financial?.salaryBasic?.toString()} onSave={v => updateFinancialMut.mutate({ salaryBasic: Number(v) })} />
-              <EditableField label="Gross Salary" value={financial?.salaryGross?.toString()} onSave={v => updateFinancialMut.mutate({ salaryGross: Number(v) })} />
-              <EditableField label="Net Salary" value={financial?.salaryNet?.toString()} onSave={v => updateFinancialMut.mutate({ salaryNet: Number(v) })} />
+              {isAdmin
+                ? <EditableField label="Basic Salary" value={financial?.salaryBasic?.toString()} onSave={v => updateFinancialMut.mutate({ salaryBasic: Number(v) })} />
+                : <Field label="Basic Salary" value={financial?.salaryBasic} />}
+              {isAdmin
+                ? <EditableField label="Gross Salary" value={financial?.salaryGross?.toString()} onSave={v => updateFinancialMut.mutate({ salaryGross: Number(v) })} />
+                : <Field label="Gross Salary" value={financial?.salaryGross} />}
+              {isAdmin
+                ? <EditableField label="Net Salary" value={financial?.salaryNet?.toString()} onSave={v => updateFinancialMut.mutate({ salaryNet: Number(v) })} />
+                : <Field label="Net Salary" value={financial?.salaryNet} />}
             </Section>
             <Section title="Allowances">
               <Field label="House Rent" value={financial?.allowanceHouseRent} />
@@ -410,31 +416,41 @@ export default function EmployeeDetail() {
               <Field label="IBAN" value={financial?.iban} />
             </Section>
             <Section title="Statutory Details">
-              <EditableField label="PAN Number" value={financial?.panNumber} onSave={v => updateFinancialMut.mutate({ panNumber: v })} />
-              <EditableField label="ESIC Number" value={financial?.esicNumber} onSave={v => updateFinancialMut.mutate({ esicNumber: v })} />
-              <EditableField label="PF Number" value={financial?.pfNumber} onSave={v => updateFinancialMut.mutate({ pfNumber: v })} />
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>OT Status *</div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {['Yes', 'No'].map(opt => (
-                    <button key={opt} onClick={() => updateFinancialMut.mutate({ otStatus: opt })}
-                      style={{ padding: '5px 18px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: `1px solid ${financial?.otStatus === opt ? '#f4b400' : '#E5E7EB'}`, background: financial?.otStatus === opt ? 'rgba(244,180,0,0.12)' : '#FFFFFF', color: financial?.otStatus === opt ? '#111827' : '#6B7280' }}>
-                      {opt}
-                    </button>
-                  ))}
+              {isAdmin
+                ? <EditableField label="PAN Number" value={financial?.panNumber} onSave={v => updateFinancialMut.mutate({ panNumber: v })} />
+                : <Field label="PAN Number" value={financial?.panNumber} />}
+              {isAdmin
+                ? <EditableField label="ESIC Number" value={financial?.esicNumber} onSave={v => updateFinancialMut.mutate({ esicNumber: v })} />
+                : <Field label="ESIC Number" value={financial?.esicNumber} />}
+              {isAdmin
+                ? <EditableField label="PF Number" value={financial?.pfNumber} onSave={v => updateFinancialMut.mutate({ pfNumber: v })} />
+                : <Field label="PF Number" value={financial?.pfNumber} />}
+              {isAdmin ? (
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>OT Status</div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {['Yes', 'No'].map(opt => (
+                      <button key={opt} onClick={() => updateFinancialMut.mutate({ otStatus: opt })}
+                        style={{ padding: '5px 18px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: `1px solid ${financial?.otStatus === opt ? '#f4b400' : '#E5E7EB'}`, background: financial?.otStatus === opt ? 'rgba(244,180,0,0.12)' : '#FFFFFF', color: financial?.otStatus === opt ? '#111827' : '#6B7280' }}>
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>ESIC Status *</div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {['Yes', 'No'].map(opt => (
-                    <button key={opt} onClick={() => updateFinancialMut.mutate({ esicStatus: opt })}
-                      style={{ padding: '5px 18px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: `1px solid ${financial?.esicStatus === opt ? '#f4b400' : '#E5E7EB'}`, background: financial?.esicStatus === opt ? 'rgba(244,180,0,0.12)' : '#FFFFFF', color: financial?.esicStatus === opt ? '#111827' : '#6B7280' }}>
-                      {opt}
-                    </button>
-                  ))}
+              ) : <Field label="OT Status" value={financial?.otStatus} />}
+              {isAdmin ? (
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>ESIC Status</div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {['Yes', 'No'].map(opt => (
+                      <button key={opt} onClick={() => updateFinancialMut.mutate({ esicStatus: opt })}
+                        style={{ padding: '5px 18px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: `1px solid ${financial?.esicStatus === opt ? '#f4b400' : '#E5E7EB'}`, background: financial?.esicStatus === opt ? 'rgba(244,180,0,0.12)' : '#FFFFFF', color: financial?.esicStatus === opt ? '#111827' : '#6B7280' }}>
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : <Field label="ESIC Status" value={financial?.esicStatus} />}
             </Section>
           </div>
         )}
