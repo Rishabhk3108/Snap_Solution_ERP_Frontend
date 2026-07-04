@@ -508,6 +508,7 @@ export default function EmployeeDetail() {
                       </button>
                       <button
                         onClick={() => updateFinancialMut.mutate({
+                          userId: empId,
                           employmentType: financialForm.employmentType || undefined,
                           salaryBasic: financialForm.salaryBasic ? Number(financialForm.salaryBasic) : undefined,
                           salaryGross: financialForm.salaryGross ? Number(financialForm.salaryGross) : undefined,
