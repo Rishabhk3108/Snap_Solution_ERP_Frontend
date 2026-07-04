@@ -78,6 +78,18 @@ export default function EmployeeDetail() {
 
   const isAdmin = authUser?.role === 'ROLE_ADMIN';
 
+  const [financialForm, setFinancialForm] = useState({
+    employmentType: '', salaryBasic: '', salaryGross: '', salaryNet: '',
+    allowanceHouseRent: '', allowanceMedical: '', allowanceSpecial: '',
+    allowanceFuel: '', allowancePhoneBill: '', allowanceOther: '', allowanceTotal: '',
+    deductionProvidentFund: '', deductionTax: '', deductionOther: '', deductionTotal: '',
+    bankName: '', accountName: '', accountNumber: '', iban: '',
+    panNumber: '', esicNumber: '', pfNumber: '',
+    otStatus: 'No', esicStatus: 'No',
+  });
+  const [financialEditing, setFinancialEditing] = useState(false);
+  const [financialSaveMsg, setFinancialSaveMsg] = useState('');
+
   const { data: emp, isLoading: loadingEmp } = useQuery({ queryKey: ['user', empId], queryFn: () => getUser(empId) });
   const { data: personal } = useQuery({ queryKey: ['personal', empId], queryFn: () => getPersonalInfoByUser(empId), retry: false });
   const { data: financial } = useQuery({ queryKey: ['financial', empId], queryFn: () => getFinancialInfoByUser(empId), retry: false });
@@ -105,6 +117,39 @@ export default function EmployeeDetail() {
     }
   }, [personal]);
 
+  useEffect(() => {
+    if (financial) {
+      const f = Array.isArray(financial) ? financial[0] : financial;
+      if (!f) return;
+      setFinancialForm({
+        employmentType: f.employmentType ?? '',
+        salaryBasic: f.salaryBasic?.toString() ?? '',
+        salaryGross: f.salaryGross?.toString() ?? '',
+        salaryNet: f.salaryNet?.toString() ?? '',
+        allowanceHouseRent: f.allowanceHouseRent?.toString() ?? '',
+        allowanceMedical: f.allowanceMedical?.toString() ?? '',
+        allowanceSpecial: f.allowanceSpecial?.toString() ?? '',
+        allowanceFuel: f.allowanceFuel?.toString() ?? '',
+        allowancePhoneBill: f.allowancePhoneBill?.toString() ?? '',
+        allowanceOther: f.allowanceOther?.toString() ?? '',
+        allowanceTotal: f.allowanceTotal?.toString() ?? '',
+        deductionProvidentFund: f.deductionProvidentFund?.toString() ?? '',
+        deductionTax: f.deductionTax?.toString() ?? '',
+        deductionOther: f.deductionOther?.toString() ?? '',
+        deductionTotal: f.deductionTotal?.toString() ?? '',
+        bankName: f.bankName ?? '',
+        accountName: f.accountName ?? '',
+        accountNumber: f.accountNumber ?? '',
+        iban: f.iban ?? '',
+        panNumber: f.panNumber ?? '',
+        esicNumber: f.esicNumber ?? '',
+        pfNumber: f.pfNumber ?? '',
+        otStatus: f.otStatus ?? 'No',
+        esicStatus: f.esicStatus ?? 'No',
+      });
+    }
+  }, [financial]);
+
   const updatePersonalMut = useMutation({
     mutationFn: (payload: any) => updatePersonalInfo(empId, payload),
     onSuccess: () => {
@@ -118,7 +163,13 @@ export default function EmployeeDetail() {
 
   const updateFinancialMut = useMutation({
     mutationFn: (payload: any) => updateFinancialInfo(empId, payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['financial', empId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['financial', empId] });
+      setFinancialSaveMsg('Financial information saved successfully!');
+      setFinancialEditing(false);
+      setTimeout(() => setFinancialSaveMsg(''), 3000);
+    },
+    onError: () => setFinancialSaveMsg('Failed to save. Please try again.'),
   });
 
   const [oldPass, setOldPass] = useState('');
@@ -381,77 +432,137 @@ export default function EmployeeDetail() {
         )}
 
         {tab === 'financial' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-            <Section title="Salary Details">
-              <Field label="Employment Type" value={financial?.employmentType} />
-              {isAdmin
-                ? <EditableField label="Basic Salary" value={financial?.salaryBasic?.toString()} onSave={v => updateFinancialMut.mutate({ salaryBasic: Number(v) })} />
-                : <Field label="Basic Salary" value={financial?.salaryBasic} />}
-              {isAdmin
-                ? <EditableField label="Gross Salary" value={financial?.salaryGross?.toString()} onSave={v => updateFinancialMut.mutate({ salaryGross: Number(v) })} />
-                : <Field label="Gross Salary" value={financial?.salaryGross} />}
-              {isAdmin
-                ? <EditableField label="Net Salary" value={financial?.salaryNet?.toString()} onSave={v => updateFinancialMut.mutate({ salaryNet: Number(v) })} />
-                : <Field label="Net Salary" value={financial?.salaryNet} />}
-            </Section>
-            <Section title="Allowances">
-              <Field label="House Rent" value={financial?.allowanceHouseRent} />
-              <Field label="Medical" value={financial?.allowanceMedical} />
-              <Field label="Special" value={financial?.allowanceSpecial} />
-              <Field label="Fuel" value={financial?.allowanceFuel} />
-              <Field label="Phone Bill" value={financial?.allowancePhoneBill} />
-              <Field label="Other" value={financial?.allowanceOther} />
-              <Field label="Total Allowance" value={financial?.allowanceTotal} />
-            </Section>
-            <Section title="Deductions">
-              <Field label="Provident Fund" value={financial?.deductionProvidentFund} />
-              <Field label="Tax" value={financial?.deductionTax} />
-              <Field label="Other" value={financial?.deductionOther} />
-              <Field label="Total Deduction" value={financial?.deductionTotal} />
-            </Section>
-            <Section title="Bank Details">
-              <Field label="Bank Name" value={financial?.bankName} />
-              <Field label="Account Name" value={financial?.accountName} />
-              <Field label="Account Number" value={financial?.accountNumber} />
-              <Field label="IBAN" value={financial?.iban} />
-            </Section>
-            <Section title="Statutory Details">
-              {isAdmin
-                ? <EditableField label="PAN Number" value={financial?.panNumber} onSave={v => updateFinancialMut.mutate({ panNumber: v })} />
-                : <Field label="PAN Number" value={financial?.panNumber} />}
-              {isAdmin
-                ? <EditableField label="ESIC Number" value={financial?.esicNumber} onSave={v => updateFinancialMut.mutate({ esicNumber: v })} />
-                : <Field label="ESIC Number" value={financial?.esicNumber} />}
-              {isAdmin
-                ? <EditableField label="PF Number" value={financial?.pfNumber} onSave={v => updateFinancialMut.mutate({ pfNumber: v })} />
-                : <Field label="PF Number" value={financial?.pfNumber} />}
-              {isAdmin ? (
-                <div style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>OT Status</div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {['Yes', 'No'].map(opt => (
-                      <button key={opt} onClick={() => updateFinancialMut.mutate({ otStatus: opt })}
-                        style={{ padding: '5px 18px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: `1px solid ${financial?.otStatus === opt ? '#f4b400' : '#E5E7EB'}`, background: financial?.otStatus === opt ? 'rgba(244,180,0,0.12)' : '#FFFFFF', color: financial?.otStatus === opt ? '#111827' : '#6B7280' }}>
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
+          <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 14, padding: '24px 28px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #E5E7EB', paddingBottom: 12, marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#111827', fontFamily: "'Archivo', sans-serif" }}>Financial Information</h3>
+              {isAdmin && !financialEditing && (
+                <button onClick={() => setFinancialEditing(true)}
+                  style={{ background: 'rgba(244,180,0,0.08)', border: '1px solid rgba(244,180,0,0.3)', borderRadius: 7, padding: '6px 16px', color: '#d97706', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                  Edit
+                </button>
+              )}
+            </div>
+
+            {financialSaveMsg && (
+              <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, fontSize: 13,
+                background: financialSaveMsg.includes('success') ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                border: `1px solid ${financialSaveMsg.includes('success') ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`,
+                color: financialSaveMsg.includes('success') ? '#16a34a' : '#dc2626' }}>
+                {financialSaveMsg}
+              </div>
+            )}
+
+            {(() => {
+              const fin = Array.isArray(financial) ? financial[0] : financial;
+              const ff = financialForm;
+              const inp = (label: string, key: keyof typeof ff, type = 'text') => (
+                <div key={key} style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 3, fontWeight: 500 }}>{label}</div>
+                  {financialEditing
+                    ? <input type={type} value={ff[key]} onChange={e => setFinancialForm(f => ({ ...f, [key]: e.target.value }))} style={{ width: '100%', ...inputSt }} />
+                    : <div style={{ fontSize: 14, color: (fin as any)?.[key] ? '#111827' : '#9CA3AF' }}>{(fin as any)?.[key] ?? '—'}</div>}
                 </div>
-              ) : <Field label="OT Status" value={financial?.otStatus} />}
-              {isAdmin ? (
-                <div style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>ESIC Status</div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {['Yes', 'No'].map(opt => (
-                      <button key={opt} onClick={() => updateFinancialMut.mutate({ esicStatus: opt })}
-                        style={{ padding: '5px 18px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: `1px solid ${financial?.esicStatus === opt ? '#f4b400' : '#E5E7EB'}`, background: financial?.esicStatus === opt ? 'rgba(244,180,0,0.12)' : '#FFFFFF', color: financial?.esicStatus === opt ? '#111827' : '#6B7280' }}>
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
+              );
+              const yesno = (label: string, key: 'otStatus' | 'esicStatus') => (
+                <div key={key} style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>{label}</div>
+                  {financialEditing ? (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {['Yes', 'No'].map(opt => (
+                        <button key={opt} type="button" onClick={() => setFinancialForm(f => ({ ...f, [key]: opt }))}
+                          style={{ padding: '5px 18px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: `1px solid ${ff[key] === opt ? '#f4b400' : '#E5E7EB'}`, background: ff[key] === opt ? 'rgba(244,180,0,0.12)' : '#FFFFFF', color: ff[key] === opt ? '#111827' : '#6B7280' }}>
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  ) : <div style={{ fontSize: 14, color: '#111827' }}>{(fin as any)?.[key] ?? '—'}</div>}
                 </div>
-              ) : <Field label="ESIC Status" value={financial?.esicStatus} />}
-            </Section>
+              );
+              return (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 28px' }}>
+                    <div>
+                      <p style={{ margin: '0 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Salary</p>
+                      {inp('Employment Type', 'employmentType')}
+                      {inp('Basic Salary', 'salaryBasic', 'number')}
+                      {inp('Gross Salary', 'salaryGross', 'number')}
+                      {inp('Net Salary', 'salaryNet', 'number')}
+                    </div>
+                    <div>
+                      <p style={{ margin: '0 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Allowances</p>
+                      {inp('House Rent', 'allowanceHouseRent', 'number')}
+                      {inp('Medical', 'allowanceMedical', 'number')}
+                      {inp('Special', 'allowanceSpecial', 'number')}
+                      {inp('Fuel', 'allowanceFuel', 'number')}
+                      {inp('Phone Bill', 'allowancePhoneBill', 'number')}
+                      {inp('Other', 'allowanceOther', 'number')}
+                      {inp('Total Allowance', 'allowanceTotal', 'number')}
+                    </div>
+                    <div>
+                      <p style={{ margin: '16px 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Deductions</p>
+                      {inp('Provident Fund', 'deductionProvidentFund', 'number')}
+                      {inp('Tax', 'deductionTax', 'number')}
+                      {inp('Other', 'deductionOther', 'number')}
+                      {inp('Total Deduction', 'deductionTotal', 'number')}
+                    </div>
+                    <div>
+                      <p style={{ margin: '16px 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Bank Details</p>
+                      {inp('Bank Name', 'bankName')}
+                      {inp('Account Name', 'accountName')}
+                      {inp('Account Number', 'accountNumber')}
+                      {inp('IBAN', 'iban')}
+                    </div>
+                    <div>
+                      <p style={{ margin: '16px 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Statutory</p>
+                      {inp('PAN Number', 'panNumber')}
+                      {inp('ESIC Number', 'esicNumber')}
+                      {inp('PF Number', 'pfNumber')}
+                      {yesno('OT Status', 'otStatus')}
+                      {yesno('ESIC Status', 'esicStatus')}
+                    </div>
+                  </div>
+                  {financialEditing && (
+                    <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                      <button onClick={() => { setFinancialEditing(false); setFinancialSaveMsg(''); }}
+                        style={{ background: '#F3F4F6', color: '#6B7280', border: '1px solid #E5E7EB', borderRadius: 8, padding: '10px 20px', fontSize: 13, cursor: 'pointer' }}>
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => updateFinancialMut.mutate({
+                          employmentType: financialForm.employmentType || undefined,
+                          salaryBasic: financialForm.salaryBasic ? Number(financialForm.salaryBasic) : undefined,
+                          salaryGross: financialForm.salaryGross ? Number(financialForm.salaryGross) : undefined,
+                          salaryNet: financialForm.salaryNet ? Number(financialForm.salaryNet) : undefined,
+                          allowanceHouseRent: financialForm.allowanceHouseRent ? Number(financialForm.allowanceHouseRent) : undefined,
+                          allowanceMedical: financialForm.allowanceMedical ? Number(financialForm.allowanceMedical) : undefined,
+                          allowanceSpecial: financialForm.allowanceSpecial ? Number(financialForm.allowanceSpecial) : undefined,
+                          allowanceFuel: financialForm.allowanceFuel ? Number(financialForm.allowanceFuel) : undefined,
+                          allowancePhoneBill: financialForm.allowancePhoneBill ? Number(financialForm.allowancePhoneBill) : undefined,
+                          allowanceOther: financialForm.allowanceOther ? Number(financialForm.allowanceOther) : undefined,
+                          allowanceTotal: financialForm.allowanceTotal ? Number(financialForm.allowanceTotal) : undefined,
+                          deductionProvidentFund: financialForm.deductionProvidentFund ? Number(financialForm.deductionProvidentFund) : undefined,
+                          deductionTax: financialForm.deductionTax ? Number(financialForm.deductionTax) : undefined,
+                          deductionOther: financialForm.deductionOther ? Number(financialForm.deductionOther) : undefined,
+                          deductionTotal: financialForm.deductionTotal ? Number(financialForm.deductionTotal) : undefined,
+                          bankName: financialForm.bankName || undefined,
+                          accountName: financialForm.accountName || undefined,
+                          accountNumber: financialForm.accountNumber || undefined,
+                          iban: financialForm.iban || undefined,
+                          panNumber: financialForm.panNumber || undefined,
+                          esicNumber: financialForm.esicNumber || undefined,
+                          pfNumber: financialForm.pfNumber || undefined,
+                          otStatus: financialForm.otStatus,
+                          esicStatus: financialForm.esicStatus,
+                        })}
+                        disabled={updateFinancialMut.isPending}
+                        style={{ background: '#f4b400', color: '#1f1f1f', border: 'none', borderRadius: 8, padding: '10px 28px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
+                        {updateFinancialMut.isPending ? 'Saving…' : 'Save Changes'}
+                      </button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
 
