@@ -434,12 +434,46 @@ export default function EmployeeDetail() {
             {(() => {
               const fin = Array.isArray(financial) ? financial[0] : financial;
               const ff = financialForm;
+              const recalc = (updated: typeof ff) => {
+                const basic = Number(updated.salaryBasic) || 0;
+                const allowTotal = (Number(updated.allowanceHouseRent) || 0)
+                  + (Number(updated.allowanceMedical) || 0)
+                  + (Number(updated.allowanceSpecial) || 0)
+                  + (Number(updated.allowanceTravelling) || 0)
+                  + (Number(updated.allowanceOther) || 0);
+                const deductTotal = (Number(updated.deductionProvidentFund) || 0)
+                  + (Number(updated.deductionProfessionalTax) || 0)
+                  + (Number(updated.deductionTax) || 0)
+                  + (Number(updated.deductionOther) || 0);
+                return {
+                  ...updated,
+                  allowanceTotal: allowTotal.toString(),
+                  salaryGross: (basic + allowTotal).toString(),
+                  deductionTotal: deductTotal.toString(),
+                  salaryNet: (basic + allowTotal - deductTotal).toString(),
+                };
+              };
+              const handleChange = (key: keyof typeof ff, value: string) =>
+                setFinancialForm(f => recalc({ ...f, [key]: value }));
+
               const inp = (label: string, key: keyof typeof ff, type = 'text') => (
                 <div key={key} style={{ marginBottom: 12 }}>
                   <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 3, fontWeight: 500 }}>{label}</div>
                   {financialEditing
-                    ? <input type={type} value={ff[key]} onChange={e => setFinancialForm(f => ({ ...f, [key]: e.target.value }))} style={{ ...inputSt }} />
+                    ? <input type={type} value={ff[key]} onChange={e => handleChange(key, e.target.value)} style={{ ...inputSt }} />
                     : <div style={{ fontSize: 14, color: (fin as any)?.[key] ? '#111827' : '#9CA3AF' }}>{(fin as any)?.[key] ?? '—'}</div>}
+                </div>
+              );
+              const calcField = (label: string, key: keyof typeof ff) => (
+                <div key={key} style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 3, fontWeight: 500 }}>{label}</div>
+                  {financialEditing
+                    ? <div style={{ ...inputSt, background: 'rgba(244,180,0,0.07)', border: '1px solid rgba(244,180,0,0.3)', color: '#d97706', fontWeight: 600, borderRadius: 7, padding: '8px 12px', fontSize: 13 }}>
+                        {ff[key] ? `₹${Number(ff[key]).toLocaleString()}` : '₹0'}
+                      </div>
+                    : <div style={{ fontSize: 14, fontWeight: 600, color: (fin as any)?.[key] ? '#d97706' : '#9CA3AF' }}>
+                        {(fin as any)?.[key] != null ? `₹${Number((fin as any)[key]).toLocaleString()}` : '—'}
+                      </div>}
                 </div>
               );
               const sel = (label: string, key: keyof typeof ff, options: string[]) => (
@@ -475,8 +509,8 @@ export default function EmployeeDetail() {
                       <p style={{ margin: '0 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Salary</p>
                       {sel('Employment Type', 'employmentType', ['Full Time', 'Part Time', 'Permanent', 'Contract', 'Intern'])}
                       {inp('Basic Salary', 'salaryBasic', 'number')}
-                      {inp('Gross Salary', 'salaryGross', 'number')}
-                      {inp('Net Salary', 'salaryNet', 'number')}
+                      {calcField('Gross Salary', 'salaryGross')}
+                      {calcField('Net Salary', 'salaryNet')}
                     </div>
                     <div>
                       <p style={{ margin: '0 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Allowances</p>
@@ -485,7 +519,7 @@ export default function EmployeeDetail() {
                       {inp('Special', 'allowanceSpecial', 'number')}
                       {inp('Travelling', 'allowanceTravelling', 'number')}
                       {inp('Other', 'allowanceOther', 'number')}
-                      {inp('Total Allowance', 'allowanceTotal', 'number')}
+                      {calcField('Total Allowance', 'allowanceTotal')}
                     </div>
                     <div>
                       <p style={{ margin: '16px 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Deductions</p>
@@ -493,7 +527,7 @@ export default function EmployeeDetail() {
                       {inp('Professional Tax', 'deductionProfessionalTax', 'number')}
                       {inp('Tax (TDS)', 'deductionTax', 'number')}
                       {inp('Other', 'deductionOther', 'number')}
-                      {inp('Total Deduction', 'deductionTotal', 'number')}
+                      {calcField('Total Deduction', 'deductionTotal')}
                     </div>
                     <div>
                       <p style={{ margin: '16px 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Bank Details</p>
