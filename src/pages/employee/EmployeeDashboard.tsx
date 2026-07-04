@@ -78,11 +78,12 @@ export default function EmployeeDashboard() {
     queryFn: getAllAnnouncements,
     retry: false,
   });
-  const { data: financial } = useQuery({
+  const { data: financialRaw } = useQuery({
     queryKey: ['financial', user?.id],
     queryFn: () => getFinancialInfoByUser(user!.id),
     enabled: !!user?.id, retry: false,
   });
+  const financial = Array.isArray(financialRaw) ? financialRaw[0] : financialRaw;
 
   const checkInMut = useMutation({
     mutationFn: () => {

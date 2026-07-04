@@ -24,11 +24,12 @@ export default function MySalary() {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
 
-  const { data: financial } = useQuery({
+  const { data: financialRaw } = useQuery({
     queryKey: ['financial', user?.id],
     queryFn: () => getFinancialInfoByUser(user!.id),
     enabled: !!user?.id, retry: false,
   });
+  const financial = Array.isArray(financialRaw) ? financialRaw[0] : financialRaw;
 
   const { data: slip, isLoading: loadingSlip } = useQuery({
     queryKey: ['salary-slip', user?.id, year, month],
