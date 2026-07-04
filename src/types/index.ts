@@ -48,11 +48,11 @@ export interface FinancialInfo {
   allowanceHouseRent?: number;
   allowanceMedical?: number;
   allowanceSpecial?: number;
-  allowanceFuel?: number;
-  allowancePhoneBill?: number;
+  allowanceTravelling?: number;
   allowanceOther?: number;
   allowanceTotal?: number;
   deductionProvidentFund?: number;
+  deductionProfessionalTax?: number;
   deductionTax?: number;
   deductionOther?: number;
   deductionTotal?: number;

@@ -60,8 +60,8 @@ export default function EmployeeDetail() {
   const [financialForm, setFinancialForm] = useState({
     employmentType: '', salaryBasic: '', salaryGross: '', salaryNet: '',
     allowanceHouseRent: '', allowanceMedical: '', allowanceSpecial: '',
-    allowanceFuel: '', allowancePhoneBill: '', allowanceOther: '', allowanceTotal: '',
-    deductionProvidentFund: '', deductionTax: '', deductionOther: '', deductionTotal: '',
+    allowanceTravelling: '', allowanceOther: '', allowanceTotal: '',
+    deductionProvidentFund: '', deductionProfessionalTax: '', deductionTax: '', deductionOther: '', deductionTotal: '',
     bankName: '', accountName: '', accountNumber: '', iban: '',
     panNumber: '', esicNumber: '', pfNumber: '',
     otStatus: 'No', esicStatus: 'No',
@@ -108,11 +108,11 @@ export default function EmployeeDetail() {
         allowanceHouseRent: f.allowanceHouseRent?.toString() ?? '',
         allowanceMedical: f.allowanceMedical?.toString() ?? '',
         allowanceSpecial: f.allowanceSpecial?.toString() ?? '',
-        allowanceFuel: f.allowanceFuel?.toString() ?? '',
-        allowancePhoneBill: f.allowancePhoneBill?.toString() ?? '',
+        allowanceTravelling: f.allowanceTravelling?.toString() ?? '',
         allowanceOther: f.allowanceOther?.toString() ?? '',
         allowanceTotal: f.allowanceTotal?.toString() ?? '',
         deductionProvidentFund: f.deductionProvidentFund?.toString() ?? '',
+        deductionProfessionalTax: f.deductionProfessionalTax?.toString() ?? '',
         deductionTax: f.deductionTax?.toString() ?? '',
         deductionOther: f.deductionOther?.toString() ?? '',
         deductionTotal: f.deductionTotal?.toString() ?? '',
@@ -483,15 +483,15 @@ export default function EmployeeDetail() {
                       {inp('House Rent', 'allowanceHouseRent', 'number')}
                       {inp('Medical', 'allowanceMedical', 'number')}
                       {inp('Special', 'allowanceSpecial', 'number')}
-                      {inp('Fuel', 'allowanceFuel', 'number')}
-                      {inp('Phone Bill', 'allowancePhoneBill', 'number')}
+                      {inp('Travelling', 'allowanceTravelling', 'number')}
                       {inp('Other', 'allowanceOther', 'number')}
                       {inp('Total Allowance', 'allowanceTotal', 'number')}
                     </div>
                     <div>
                       <p style={{ margin: '16px 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Deductions</p>
                       {inp('Provident Fund', 'deductionProvidentFund', 'number')}
-                      {inp('Tax', 'deductionTax', 'number')}
+                      {inp('Professional Tax', 'deductionProfessionalTax', 'number')}
+                      {inp('Tax (TDS)', 'deductionTax', 'number')}
                       {inp('Other', 'deductionOther', 'number')}
                       {inp('Total Deduction', 'deductionTotal', 'number')}
                     </div>
@@ -527,11 +527,11 @@ export default function EmployeeDetail() {
                           allowanceHouseRent: financialForm.allowanceHouseRent ? Number(financialForm.allowanceHouseRent) : undefined,
                           allowanceMedical: financialForm.allowanceMedical ? Number(financialForm.allowanceMedical) : undefined,
                           allowanceSpecial: financialForm.allowanceSpecial ? Number(financialForm.allowanceSpecial) : undefined,
-                          allowanceFuel: financialForm.allowanceFuel ? Number(financialForm.allowanceFuel) : undefined,
-                          allowancePhoneBill: financialForm.allowancePhoneBill ? Number(financialForm.allowancePhoneBill) : undefined,
+                          allowanceTravelling: financialForm.allowanceTravelling ? Number(financialForm.allowanceTravelling) : undefined,
                           allowanceOther: financialForm.allowanceOther ? Number(financialForm.allowanceOther) : undefined,
                           allowanceTotal: financialForm.allowanceTotal ? Number(financialForm.allowanceTotal) : undefined,
                           deductionProvidentFund: financialForm.deductionProvidentFund ? Number(financialForm.deductionProvidentFund) : undefined,
+                          deductionProfessionalTax: financialForm.deductionProfessionalTax ? Number(financialForm.deductionProfessionalTax) : undefined,
                           deductionTax: financialForm.deductionTax ? Number(financialForm.deductionTax) : undefined,
                           deductionOther: financialForm.deductionOther ? Number(financialForm.deductionOther) : undefined,
                           deductionTotal: financialForm.deductionTotal ? Number(financialForm.deductionTotal) : undefined,

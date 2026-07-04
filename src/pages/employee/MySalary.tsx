@@ -69,8 +69,7 @@ export default function MySalary() {
             <Row label="House Rent Allowance" value={financial?.allowanceHouseRent} />
             <Row label="Medical Allowance" value={financial?.allowanceMedical} />
             <Row label="Special Allowance" value={financial?.allowanceSpecial} />
-            <Row label="Fuel Allowance" value={financial?.allowanceFuel} />
-            <Row label="Phone Bill" value={financial?.allowancePhoneBill} />
+            <Row label="Travelling Allowance" value={financial?.allowanceTravelling} />
             <Row label="Other Allowance" value={financial?.allowanceOther} />
             <div style={{ padding: '12px 0 0' }}>
               <Row label="Total Allowances" value={financial?.allowanceTotal} highlight />
@@ -82,6 +81,7 @@ export default function MySalary() {
             <h3 style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: '#111827' }}>Deductions</h3>
             <p style={{ margin: '0 0 14px', fontSize: 12, color: '#9CA3AF' }}>From your financial profile</p>
             <Row label="Provident Fund" value={financial?.deductionProvidentFund} />
+            <Row label="Professional Tax" value={financial?.deductionProfessionalTax} />
             <Row label="Tax (TDS)" value={financial?.deductionTax} />
             <Row label="Other Deductions" value={financial?.deductionOther} />
             <div style={{ padding: '12px 0 0' }}>
