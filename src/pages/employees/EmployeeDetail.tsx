@@ -71,8 +71,7 @@ export default function EmployeeDetail() {
 
   const { data: emp, isLoading: loadingEmp } = useQuery({ queryKey: ['user', empId], queryFn: () => getUser(empId) });
   const { data: personal } = useQuery({ queryKey: ['personal', empId], queryFn: () => getPersonalInfoByUser(empId), retry: false });
-  const { data: financialRaw } = useQuery({ queryKey: ['financial', empId], queryFn: () => getFinancialInfoByUser(empId), retry: false });
-  const financial = Array.isArray(financialRaw) ? financialRaw[0] : financialRaw;
+  const { data: financial } = useQuery({ queryKey: ['financial', empId], queryFn: () => getFinancialInfoByUser(empId), retry: false });
   const { data: attendance } = useQuery({ queryKey: ['attendance', 'list', empId, attYear, attMonth], queryFn: () => getAttendanceList(empId, attYear, attMonth), enabled: tab === 'attendance' });
   const { data: daysWorked } = useQuery({ queryKey: ['daysWorked', empId, attYear, attMonth], queryFn: () => getDaysWorked(empId, attYear, attMonth), enabled: tab === 'attendance' });
 

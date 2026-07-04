@@ -1,9 +1,9 @@
 import client from './client';
 import type { FinancialInfo } from '../types';
 
-export const getFinancialInfoByUser = async (userId: number): Promise<FinancialInfo | FinancialInfo[]> => {
+export const getFinancialInfoByUser = async (userId: number): Promise<FinancialInfo | undefined> => {
   const { data } = await client.get(`/financialInformations/user/${userId}`);
-  return data;
+  return Array.isArray(data) ? data[0] : data;
 };
 
 export const getAllFinancialInfo = async (): Promise<FinancialInfo[]> => {
