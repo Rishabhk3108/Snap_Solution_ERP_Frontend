@@ -52,7 +52,7 @@ export default function EmployeeList() {
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [newEmp, setNewEmp] = useState({ fullname: '', username: '', password: '', jobTitle: '', role: 'ROLE_EMPLOYEE' });
-  const [personalDetails, setPersonalDetails] = useState({ mobile: '', email: '', dob: '', gender: '', city: '' });
+  const [personalDetails, setPersonalDetails] = useState({ mobile: '', email: '', dob: '', gender: '', city: '', nomineeName: '', nomineeRelationship: '' });
   const [addError, setAddError] = useState('');
 
   const [editEmp, setEditEmp] = useState<User | null>(null);
@@ -97,13 +97,15 @@ export default function EmployeeList() {
             dateOfBirth: dob || undefined,
             gender: gender || undefined,
             city: city || undefined,
+            nomineeName: personalDetails.nomineeName || undefined,
+            nomineeRelationship: personalDetails.nomineeRelationship || undefined,
           });
         } catch {}
       }
       qc.invalidateQueries({ queryKey: ['users'] });
       setShowAdd(false);
       setNewEmp({ fullname: '', username: '', password: '', jobTitle: '', role: 'ROLE_EMPLOYEE' });
-      setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '' });
+      setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '', nomineeName: '', nomineeRelationship: '' });
     },
     onError: (e: any) => setAddError(e.response?.data?.error || 'Failed to create employee'),
   });
@@ -357,6 +359,10 @@ export default function EmployeeList() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <InputField label="Date of Birth (YYYY-MM-DD)" value={personalDetails.dob} onChange={v => setPersonalDetails(p => ({ ...p, dob: v }))} />
                 <InputField label="City" value={personalDetails.city} onChange={v => setPersonalDetails(p => ({ ...p, city: v }))} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <InputField label="Nominee Name" value={personalDetails.nomineeName} onChange={v => setPersonalDetails(p => ({ ...p, nomineeName: v }))} />
+                <InputField label="Nominee Relationship" value={personalDetails.nomineeRelationship} onChange={v => setPersonalDetails(p => ({ ...p, nomineeRelationship: v }))} />
               </div>
               <div style={{ marginBottom: 4 }}>
                 <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>Gender</label>

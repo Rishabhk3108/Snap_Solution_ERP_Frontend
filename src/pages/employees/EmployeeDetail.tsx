@@ -71,6 +71,7 @@ export default function EmployeeDetail() {
     dateOfBirth: '', gender: '', maritalStatus: '', fatherName: '',
     idNumber: '', emailAddress: '', mobile: '', phone: '',
     address: '', city: '', state: '', country: '',
+    nomineeName: '', nomineeRelationship: '',
   });
   const [personalSaveMsg, setPersonalSaveMsg] = useState('');
   const [personalEditing, setPersonalEditing] = useState(false);
@@ -98,6 +99,8 @@ export default function EmployeeDetail() {
         city: personal.city ?? '',
         state: personal.state ?? '',
         country: personal.country ?? '',
+        nomineeName: personal.nomineeName ?? '',
+        nomineeRelationship: personal.nomineeRelationship ?? '',
       });
     }
   }, [personal]);
@@ -317,6 +320,8 @@ export default function EmployeeDetail() {
                     { key: 'city', label: 'City' },
                     { key: 'state', label: 'State' },
                     { key: 'country', label: 'Country' },
+                    { key: 'nomineeName', label: 'Nominee Name' },
+                    { key: 'nomineeRelationship', label: 'Nominee Relationship' },
                   ]).map(({ key, label }) => (
                     <div key={key}>
                       <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 3, fontWeight: 500 }}>{label}</div>
@@ -342,6 +347,8 @@ export default function EmployeeDetail() {
                       { key: 'city', label: 'City', type: 'text' },
                       { key: 'state', label: 'State', type: 'text' },
                       { key: 'country', label: 'Country', type: 'text' },
+                      { key: 'nomineeName', label: 'Nominee Name *', type: 'text' },
+                      { key: 'nomineeRelationship', label: 'Nominee Relationship *', type: 'text' },
                     ] as any[]).map(({ key, label, type, options }) => (
                       <div key={key}>
                         <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5, fontWeight: 500 }}>{label}</label>
@@ -401,8 +408,33 @@ export default function EmployeeDetail() {
               <Field label="Account Name" value={financial?.accountName} />
               <Field label="Account Number" value={financial?.accountNumber} />
               <Field label="IBAN" value={financial?.iban} />
-              <Field label="OT Status" value={financial?.otStatus} />
-              <Field label="ESIC Status" value={financial?.esicStatus} />
+            </Section>
+            <Section title="Statutory Details">
+              <EditableField label="PAN Number" value={financial?.panNumber} onSave={v => updateFinancialMut.mutate({ panNumber: v })} />
+              <EditableField label="ESIC Number" value={financial?.esicNumber} onSave={v => updateFinancialMut.mutate({ esicNumber: v })} />
+              <EditableField label="PF Number" value={financial?.pfNumber} onSave={v => updateFinancialMut.mutate({ pfNumber: v })} />
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>OT Status *</div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {['Yes', 'No'].map(opt => (
+                    <button key={opt} onClick={() => updateFinancialMut.mutate({ otStatus: opt })}
+                      style={{ padding: '5px 18px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: `1px solid ${financial?.otStatus === opt ? '#f4b400' : '#E5E7EB'}`, background: financial?.otStatus === opt ? 'rgba(244,180,0,0.12)' : '#FFFFFF', color: financial?.otStatus === opt ? '#111827' : '#6B7280' }}>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>ESIC Status *</div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {['Yes', 'No'].map(opt => (
+                    <button key={opt} onClick={() => updateFinancialMut.mutate({ esicStatus: opt })}
+                      style={{ padding: '5px 18px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: `1px solid ${financial?.esicStatus === opt ? '#f4b400' : '#E5E7EB'}`, background: financial?.esicStatus === opt ? 'rgba(244,180,0,0.12)' : '#FFFFFF', color: financial?.esicStatus === opt ? '#111827' : '#6B7280' }}>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </Section>
           </div>
         )}
