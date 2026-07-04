@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import client from '../api/client';
 
 const STEPS = [
   { label: 'Account Approved', done: true },
@@ -8,7 +10,26 @@ const STEPS = [
 ];
 
 export default function OnboardingWall() {
-  const { user, logout } = useAuth();
+  const { user, logout, completeOnboarding } = useAuth();
+  const [checking, setChecking] = useState(false);
+  const [errMsg, setErrMsg] = useState('');
+
+  const handleRefresh = async () => {
+    setChecking(true);
+    setErrMsg('');
+    try {
+      const { data } = await client.get('/onboarding/status');
+      if (data?.onboarding_complete) {
+        completeOnboarding();
+      } else {
+        setErrMsg('Onboarding not complete yet. Finish all steps in the mobile app first.');
+      }
+    } catch {
+      setErrMsg('Could not reach server. Please try again.');
+    } finally {
+      setChecking(false);
+    }
+  };
 
   return (
     <div style={{
@@ -124,17 +145,22 @@ export default function OnboardingWall() {
           </p>
         </div>
 
+        {errMsg && (
+          <p style={{ margin: '0 0 12px', fontSize: 13, color: '#dc2626', textAlign: 'center' }}>{errMsg}</p>
+        )}
+
         {/* Refresh button */}
         <button
-          onClick={() => window.location.reload()}
+          onClick={handleRefresh}
+          disabled={checking}
           style={{
             width: '100%', padding: '12px', borderRadius: 10,
             background: '#f4b400', color: '#1f1f1f',
             border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer',
-            marginBottom: 10,
+            marginBottom: 10, opacity: checking ? 0.7 : 1,
           }}
         >
-          Refresh to Check Status
+          {checking ? 'Checking…' : 'Refresh to Check Status'}
         </button>
 
         {/* Sign out */}
