@@ -442,6 +442,17 @@ export default function EmployeeDetail() {
                     : <div style={{ fontSize: 14, color: (fin as any)?.[key] ? '#111827' : '#9CA3AF' }}>{(fin as any)?.[key] ?? '—'}</div>}
                 </div>
               );
+              const sel = (label: string, key: keyof typeof ff, options: string[]) => (
+                <div key={key} style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 3, fontWeight: 500 }}>{label}</div>
+                  {financialEditing
+                    ? <select value={ff[key]} onChange={e => setFinancialForm(f => ({ ...f, [key]: e.target.value }))} style={{ ...inputSt }}>
+                        <option value="">— Select —</option>
+                        {options.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    : <div style={{ fontSize: 14, color: (fin as any)?.[key] ? '#111827' : '#9CA3AF' }}>{(fin as any)?.[key] ?? '—'}</div>}
+                </div>
+              );
               const yesno = (label: string, key: 'otStatus' | 'esicStatus') => (
                 <div key={key} style={{ marginBottom: 12 }}>
                   <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>{label}</div>
@@ -462,7 +473,7 @@ export default function EmployeeDetail() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 28px' }}>
                     <div>
                       <p style={{ margin: '0 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Salary</p>
-                      {inp('Employment Type', 'employmentType')}
+                      {sel('Employment Type', 'employmentType', ['Full Time', 'Part Time', 'Permanent', 'Contract', 'Intern'])}
                       {inp('Basic Salary', 'salaryBasic', 'number')}
                       {inp('Gross Salary', 'salaryGross', 'number')}
                       {inp('Net Salary', 'salaryNet', 'number')}
