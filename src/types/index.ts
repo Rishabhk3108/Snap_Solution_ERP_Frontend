@@ -2,6 +2,7 @@ export interface User {
   id: number;
   username: string;
   fullname: string;
+  fullName?: string;
   role: string;
   active: number;
   jobTitle?: string;
@@ -12,6 +13,22 @@ export interface User {
   endDate?: string;
   remark?: string;
   onboarding_complete?: boolean;
+  projectId?: number;
+  projectName?: string;
+}
+
+export interface Project {
+  id?: number;
+  name?: string;
+  description?: string;
+  customerId?: number;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+  managerCount?: number;
+  employeeCount?: number;
+  managers?: { id: number; fullName: string; jobTitle?: string }[];
+  employees?: { id: number; fullName: string; jobTitle?: string; role?: string }[];
 }
 
 export interface AuthPayload {

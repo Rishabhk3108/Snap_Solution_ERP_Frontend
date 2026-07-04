@@ -125,7 +125,8 @@ export default function EmployeeList() {
   const rows: User[] = (tab === 'active' ? activeUsers : tab === 'exited' ? exitedUsers : allUsers).filter(u =>
     u.fullname?.toLowerCase().includes(search.toLowerCase()) ||
     u.username?.toLowerCase().includes(search.toLowerCase()) ||
-    u.jobTitle?.toLowerCase().includes(search.toLowerCase())
+    u.jobTitle?.toLowerCase().includes(search.toLowerCase()) ||
+    u.projectName?.toLowerCase().includes(search.toLowerCase())
   );
 
   const loading = tab === 'active' ? loadingActive : tab === 'exited' ? loadingExited : loadingAll;
@@ -197,7 +198,7 @@ export default function EmployeeList() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-                    {['#', 'Employee', 'Username', 'Role', 'Job Title', ...(tab === 'exited' ? ['Exit Date', 'Remark'] : []), 'Actions'].map(h => (
+                    {['#', 'Employee', 'Username', 'Role', 'Job Title', 'Project', ...(tab === 'exited' ? ['Exit Date', 'Remark'] : []), 'Actions'].map(h => (
                       <th key={h} style={{ textAlign: 'left', padding: '12px 16px', fontSize: 11, color: '#6B7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>{h}</th>
                     ))}
                   </tr>
@@ -226,6 +227,12 @@ export default function EmployeeList() {
                           </span>
                         </td>
                         <td style={{ padding: '12px 16px', fontSize: 13, color: '#6B7280' }}>{u.jobTitle || '—'}</td>
+                        <td style={{ padding: '12px 16px', fontSize: 13 }}>
+                          {u.projectName
+                            ? <span style={{ padding: '3px 8px', background: 'rgba(59,130,246,0.08)', color: '#2563eb', borderRadius: 4, fontSize: 12, fontWeight: 600 }}>{u.projectName}</span>
+                            : <span style={{ color: '#9CA3AF' }}>—</span>
+                          }
+                        </td>
                         {tab === 'exited' && (
                           <>
                             <td style={{ padding: '12px 16px', fontSize: 13, color: '#dc2626' }}>{u.endDate ?? '—'}</td>
