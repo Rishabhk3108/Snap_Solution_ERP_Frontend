@@ -34,6 +34,8 @@ export interface PersonalInfo {
   mobile?: string;
   phone?: string;
   emailAddress?: string;
+  nomineeName?: string;
+  nomineeRelationship?: string;
 }
 
 export interface FinancialInfo {
@@ -61,6 +63,9 @@ export interface FinancialInfo {
   otStatus?: string;
   esicStatus?: string;
   OtWorkingHours?: number;
+  panNumber?: string;
+  esicNumber?: string;
+  pfNumber?: string;
 }
 
 export interface EmployeeInfo {

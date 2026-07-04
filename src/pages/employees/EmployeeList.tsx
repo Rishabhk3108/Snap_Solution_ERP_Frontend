@@ -328,7 +328,7 @@ export default function EmployeeList() {
       )}
 
       {showAdd && (
-        <Modal title="Add New Employee" onClose={() => { setShowAdd(false); setAddError(''); setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '' }); }}>
+        <Modal title="Add New Employee" onClose={() => { setShowAdd(false); setAddError(''); setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '', nomineeName: '', nomineeRelationship: '' }); }}>
           {addError && <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, padding: '10px 14px', color: '#dc2626', fontSize: 13, marginBottom: 16 }}>{addError}</div>}
           <form onSubmit={e => { e.preventDefault(); setAddError(''); createMut.mutate(newEmp); }}>
             <InputField label="Full Name" value={newEmp.fullname} onChange={v => setNewEmp(p => ({ ...p, fullname: v }))} required />
