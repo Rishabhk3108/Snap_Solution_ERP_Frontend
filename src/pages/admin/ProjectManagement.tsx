@@ -330,28 +330,33 @@ export default function ProjectManagement() {
 
               {detailTab === 'managers' && (
                 <>
-                  <div style={{ marginBottom: 14 }}>
-                    <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 6 }}>Add Manager</label>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <select value={addManagerId} onChange={e => setAddManagerId(e.target.value)} style={{ ...inp, flex: 1 }}>
-                        <option value="">Select manager…</option>
-                        {availableManagers.map((u: any) => (
-                          <option key={u.id} value={u.id}>[{u.id}] {u.fullName || u.fullname}</option>
-                        ))}
-                      </select>
-                      <button onClick={() => { if (addManagerId) assignMgrMut.mutate(); }}
-                        disabled={!addManagerId || assignMgrMut.isPending}
-                        style={{ padding: '8px 14px', background: '#f4b400', border: 'none', borderRadius: 7, color: '#1f1f1f', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
-                        Add
-                      </button>
-                    </div>
-                  </div>
-
                   {managers.length === 0 ? (
-                    <p style={{ color: '#9CA3AF', fontSize: 13 }}>No managers assigned yet.</p>
-                  ) : managers.map((m: any) => (
+                    <div style={{ marginBottom: 14 }}>
+                      <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 6 }}>Assign Manager</label>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <select value={addManagerId} onChange={e => setAddManagerId(e.target.value)} style={{ ...inp, flex: 1 }}>
+                          <option value="">Select manager…</option>
+                          {availableManagers.map((u: any) => (
+                            <option key={u.id} value={u.id}>[{u.id}] {u.fullName || u.fullname}</option>
+                          ))}
+                        </select>
+                        <button onClick={() => { if (addManagerId) assignMgrMut.mutate(); }}
+                          disabled={!addManagerId || assignMgrMut.isPending}
+                          style={{ padding: '8px 14px', background: '#f4b400', border: 'none', borderRadius: 7, color: '#1f1f1f', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                          Assign
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: 12, color: '#6B7280', marginBottom: 12, background: 'rgba(244,180,0,0.08)', border: '1px solid rgba(244,180,0,0.2)', borderRadius: 7, padding: '8px 12px' }}>
+                      A manager is already assigned. Remove them to assign a different one.
+                    </p>
+                  )}
+
+                  {managers.map((m: any) => (
                     <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 8, marginBottom: 8 }}>
                       <div>
+                        <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 2 }}>ID: {m.id}</div>
                         <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{m.fullName}</div>
                         <div style={{ fontSize: 11, color: '#6B7280' }}>{m.jobTitle || '—'}</div>
                       </div>
@@ -390,6 +395,7 @@ export default function ProjectManagement() {
                   ) : employees.map((e: any) => (
                     <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 8, marginBottom: 8 }}>
                       <div>
+                        <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 2 }}>ID: {e.id}</div>
                         <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{e.fullName}</div>
                         <div style={{ fontSize: 11, color: '#6B7280' }}>{e.jobTitle || '—'}</div>
                       </div>
