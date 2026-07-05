@@ -155,10 +155,10 @@ export default function ProjectManagement() {
   const assignedEmpIds = new Set(employees.map((e: any) => e.id));
 
   const availableManagers = userList.filter(
-    (u: any) => (u.role === 'ROLE_MANAGER' || u.role === 'ROLE_ADMIN') && !assignedMgrIds.has(u.id),
+    (u: any) => u.role === 'ROLE_MANAGER' && !assignedMgrIds.has(u.id),
   );
   const availableEmployees = userList.filter(
-    (u: any) => !assignedEmpIds.has(u.id),
+    (u: any) => u.role === 'ROLE_EMPLOYEE' && !assignedEmpIds.has(u.id),
   );
 
   return (
@@ -336,7 +336,7 @@ export default function ProjectManagement() {
                       <select value={addManagerId} onChange={e => setAddManagerId(e.target.value)} style={{ ...inp, flex: 1 }}>
                         <option value="">Select manager…</option>
                         {availableManagers.map((u: any) => (
-                          <option key={u.id} value={u.id}>{u.fullName || u.fullname} ({u.role === 'ROLE_ADMIN' ? 'Admin' : 'Manager'})</option>
+                          <option key={u.id} value={u.id}>[{u.id}] {u.fullName || u.fullname}</option>
                         ))}
                       </select>
                       <button onClick={() => { if (addManagerId) assignMgrMut.mutate(); }}
@@ -373,8 +373,7 @@ export default function ProjectManagement() {
                         <option value="">Select employee…</option>
                         {availableEmployees.map((u: any) => (
                           <option key={u.id} value={u.id}>
-                            {u.fullName || u.fullname}
-                            {u.projectName ? ` (${u.projectName})` : ''}
+                            [{u.id}] {u.fullName || u.fullname}{u.projectName ? ` — ${u.projectName}` : ''}
                           </option>
                         ))}
                       </select>
