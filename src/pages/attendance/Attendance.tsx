@@ -9,6 +9,7 @@ import {
   updateAttendanceById,
 } from '../../api/attendance';
 import { getActiveUsers } from '../../api/users';
+import { getAllProjects } from '../../api/projects';
 import { useAuth } from '../../contexts/AuthContext';
 
 function formatTime(t?: string) {
@@ -32,7 +33,8 @@ const inputStyle = {
 
 export default function Attendance() {
   const { user } = useAuth();
-  const isAdminOrManager = user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_MANAGER';
+  const isAdmin = user?.role === 'ROLE_ADMIN';
+  const isAdminOrManager = isAdmin || user?.role === 'ROLE_MANAGER';
 
   const today = new Date().toISOString().split('T')[0];
   const firstOfMonth = `${today.slice(0, 7)}-01`;
@@ -40,6 +42,7 @@ export default function Attendance() {
   const [startDate, setStartDate] = useState(firstOfMonth);
   const [endDate, setEndDate] = useState(today);
   const [empFilter, setEmpFilter] = useState('');
+  const [projectFilter, setProjectFilter] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [editRecord, setEditRecord] = useState<any | null>(null);
   const [editStart, setEditStart] = useState('');
@@ -52,14 +55,15 @@ export default function Attendance() {
   });
   const [addMsg, setAddMsg] = useState('');
 
-  const { data: todaySummary } = useQuery({ queryKey: ['attendance', 'today-summary'], queryFn: getTodaySummary, retry: 1 });
-  const { data: activeUsers = [] } = useQuery({ queryKey: ['users', 'active'], queryFn: getActiveUsers, retry: 1 });
+  const { data: todaySummary } = useQuery({ queryKey: ['attendance', 'today-summary', user?.id], queryFn: getTodaySummary, retry: 1 });
+  const { data: activeUsers = [] } = useQuery({ queryKey: ['users', 'active', user?.id], queryFn: getActiveUsers, retry: 1 });
+  const { data: allProjects = [] } = useQuery({ queryKey: ['projects'], queryFn: getAllProjects, enabled: isAdmin, retry: false });
 
   const filterQuery = useQuery({
-    queryKey: ['attendance', 'filter', startDate, endDate, empFilter],
+    queryKey: ['attendance', 'filter', startDate, endDate, empFilter, projectFilter, user?.id],
     queryFn: () => empFilter
       ? getAttendanceByFilterEmp({ startDate, endDate, empid: empFilter })
-      : getAttendanceByDateRange({ startDate, endDate }),
+      : getAttendanceByDateRange({ startDate, endDate, projectId: projectFilter ? Number(projectFilter) : undefined }),
     enabled: !!(startDate && endDate),
   });
 
@@ -141,12 +145,21 @@ export default function Attendance() {
               <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 4, fontWeight: 500 }}>End Date</label>
               <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={inputStyle} />
             </div>
+            {isAdmin && (
+              <div>
+                <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 4, fontWeight: 500 }}>Project</label>
+                <select value={projectFilter} onChange={e => { setProjectFilter(e.target.value); setEmpFilter(''); }} style={{ ...inputStyle, minWidth: 180 }}>
+                  <option value="">All Projects</option>
+                  {(allProjects as any[]).map((p: any) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
+                </select>
+              </div>
+            )}
             {isAdminOrManager && (
               <div>
                 <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 4, fontWeight: 500 }}>Employee</label>
-                <select value={empFilter} onChange={e => setEmpFilter(e.target.value)} style={{ ...inputStyle, minWidth: 220 }}>
+                <select value={empFilter} onChange={e => { setEmpFilter(e.target.value); setProjectFilter(''); }} style={{ ...inputStyle, minWidth: 220 }}>
                   <option value="">All Employees</option>
-                  {(activeUsers as any[]).map((u: any) => <option key={u.id} value={String(u.id)}>{u.fullname} ({u.id})</option>)}
+                  {(activeUsers as any[]).map((u: any) => <option key={u.id} value={String(u.id)}>{u.fullName || u.fullname} ({u.id})</option>)}
                 </select>
               </div>
             )}

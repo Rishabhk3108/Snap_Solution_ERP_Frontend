@@ -66,13 +66,13 @@ export default function EmployeeList() {
   };
 
   const { data: activeUsers = [], isLoading: loadingActive } = useQuery({
-    queryKey: ['users', 'active'], queryFn: getActiveUsers, retry: false,
+    queryKey: ['users', 'active', user?.id], queryFn: getActiveUsers, retry: false,
   });
   const { data: allUsers = [], isLoading: loadingAll } = useQuery({
-    queryKey: ['users', 'all'], queryFn: getAllUsers, enabled: isAdminOrManager, retry: false,
+    queryKey: ['users', 'all', user?.id], queryFn: getAllUsers, enabled: isAdminOrManager, retry: false,
   });
   const { data: exitedUsers = [], isLoading: loadingExited } = useQuery({
-    queryKey: ['users', 'exited'], queryFn: getExitedUsers, enabled: isAdminOrManager, retry: false,
+    queryKey: ['users', 'exited', user?.id], queryFn: getExitedUsers, enabled: isAdminOrManager, retry: false,
   });
 
   const deleteMut = useMutation({
