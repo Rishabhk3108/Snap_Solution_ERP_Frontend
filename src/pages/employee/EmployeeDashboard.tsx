@@ -84,43 +84,43 @@ export default function EmployeeDashboard() {
     enabled: !!user?.id, retry: false,
   });
 
-  const checkInMut = useMutation({
-    mutationFn: () => {
-      const t = new Date();
-      const timeStr = t.toTimeString().split(' ')[0];
-      return addAttendance({ empid: user!.id, projectId: 1, date: today, startTime: timeStr, location: '', year, month });
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['att-status'] });
-      qc.invalidateQueries({ queryKey: ['att-list'] });
-      qc.invalidateQueries({ queryKey: ['daysWorked'] });
-      setAttMsg('Checked in successfully!');
-      setTimeout(() => setAttMsg(''), 4000);
-    },
-    onError: (e: any) => {
-      setAttMsg(e?.response?.data?.error || 'Check-in failed. Please try again.');
-      setTimeout(() => setAttMsg(''), 4000);
-    },
-  });
+  // const checkInMut = useMutation({
+  //   mutationFn: () => {
+  //     const t = new Date();
+  //     const timeStr = t.toTimeString().split(' ')[0];
+  //     return addAttendance({ empid: user!.id, projectId: 1, date: today, startTime: timeStr, location: '', year, month });
+  //   },
+  //   onSuccess: () => {
+  //     qc.invalidateQueries({ queryKey: ['att-status'] });
+  //     qc.invalidateQueries({ queryKey: ['att-list'] });
+  //     qc.invalidateQueries({ queryKey: ['daysWorked'] });
+  //     setAttMsg('Checked in successfully!');
+  //     setTimeout(() => setAttMsg(''), 4000);
+  //   },
+  //   onError: (e: any) => {
+  //     setAttMsg(e?.response?.data?.error || 'Check-in failed. Please try again.');
+  //     setTimeout(() => setAttMsg(''), 4000);
+  //   },
+  // });
 
-  const checkOutMut = useMutation({
-    mutationFn: () => {
-      const t = new Date();
-      const timeStr = t.toTimeString().split(' ')[0];
-      return updateAttendance({ empid: user!.id, date: today, endTime: timeStr });
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['att-status'] });
-      qc.invalidateQueries({ queryKey: ['att-list'] });
-      qc.invalidateQueries({ queryKey: ['daysWorked'] });
-      setAttMsg('Checked out successfully!');
-      setTimeout(() => setAttMsg(''), 4000);
-    },
-    onError: (e: any) => {
-      setAttMsg(e?.response?.data?.error || 'Check-out failed. Please try again.');
-      setTimeout(() => setAttMsg(''), 4000);
-    },
-  });
+  // const checkOutMut = useMutation({
+  //   mutationFn: () => {
+  //     const t = new Date();
+  //     const timeStr = t.toTimeString().split(' ')[0];
+  //     return updateAttendance({ empid: user!.id, date: today, endTime: timeStr });
+  //   },
+  //   onSuccess: () => {
+  //     qc.invalidateQueries({ queryKey: ['att-status'] });
+  //     qc.invalidateQueries({ queryKey: ['att-list'] });
+  //     qc.invalidateQueries({ queryKey: ['daysWorked'] });
+  //     setAttMsg('Checked out successfully!');
+  //     setTimeout(() => setAttMsg(''), 4000);
+  //   },
+  //   onError: (e: any) => {
+  //     setAttMsg(e?.response?.data?.error || 'Check-out failed. Please try again.');
+  //     setTimeout(() => setAttMsg(''), 4000);
+  //   },
+  // });
 
   const daysWorkedCount = typeof daysWorked === 'object' ? (daysWorked as any)?.daysWorked ?? 0 : daysWorked ?? 0;
   const pendingLeaves = (leaves as any[]).filter(l => l.status === 'Pending').length;
@@ -143,25 +143,26 @@ export default function EmployeeDashboard() {
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: sl.color, boxShadow: `0 0 8px ${sl.color}` }} />
                   <span style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>{sl.label}</span>
                   <span style={{ fontSize: 12, color: '#6B7280' }}>{today}</span>
-                  {currentStatus === 'NC' && <span style={{ fontSize: 12, color: '#3b82f6' }}>— Remember to check out!</span>}
+                  {/* {currentStatus === 'NC' && <span style={{ fontSize: 12, color: '#3b82f6' }}>— Remember to check out!</span>} */} 
                 </div>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                  {currentStatus === 'A' && (
+                  {/* {currentStatus === 'A' && (
                     <button
                       onClick={() => checkInMut.mutate()}
                       disabled={checkInMut.isPending}
                       style={{ background: '#22c55e', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                       {checkInMut.isPending ? 'Checking in…' : '▶ Check In'}
                     </button>
-                  )}
-                  {currentStatus === 'NC' && (
+                  )} */}
+                  
+                  {/* {currentStatus === 'NC' && (
                     <button
                       onClick={() => checkOutMut.mutate()}
                       disabled={checkOutMut.isPending}
                       style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                       {checkOutMut.isPending ? 'Checking out…' : '■ Check Out'}
                     </button>
-                  )}
+                  )} */}
                   <button onClick={() => navigate('/my-attendance')}
                     style={{ background: 'transparent', color: sl.color, border: `1px solid ${sl.color}60`, borderRadius: 8, padding: '7px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
                     View Attendance →
