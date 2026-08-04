@@ -1,9 +1,11 @@
 ﻿import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+// import { useMutation, useQueryClient } from '@tanstack/react-query'; // needed if the check-in/out mutations below are restored
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Layout/Header';
 import { useAuth } from '../../contexts/AuthContext';
-import { getAttendanceList, getDaysWorked, getAttendanceStatus, addAttendance, updateAttendance } from '../../api/attendance';
+import { getAttendanceList, getDaysWorked, getAttendanceStatus } from '../../api/attendance';
+// import { addAttendance, updateAttendance } from '../../api/attendance'; // needed if the check-in/out mutations below are restored
 import { getMyLeaves } from '../../api/leave';
 import { getAllAnnouncements } from '../../api/announcements';
 import { getFinancialInfoByUser } from '../../api/financialInfo';
@@ -43,12 +45,13 @@ const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }
 export default function EmployeeDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const qc = useQueryClient();
+  // const qc = useQueryClient(); // needed if the check-in/out mutations below are restored
   const now = new Date();
   const today = now.toISOString().split('T')[0];
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
-  const [attMsg, setAttMsg] = useState('');
+  // setAttMsg is unused while the check-in/out mutations below are commented out — restore the setter when re-enabling them
+  const [attMsg] = useState('');
 
   const hour = now.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
