@@ -31,6 +31,7 @@ import TeamLeaves from './pages/manager/TeamLeaves';
 import TeamExpenses from './pages/manager/TeamExpenses';
 import FinancialOverview from './pages/manager/FinancialOverview';
 import PaymentRecords from './pages/manager/PaymentRecords';
+import ManagerProjects from './pages/manager/ManagerProjects';
 
 // Employee self-service pages
 import MyAttendance from './pages/employee/MyAttendance';
@@ -94,6 +95,7 @@ export default function App() {
               <Route path="financial-overview" element={<FinancialOverview />} />
               <Route path="payment-records" element={<PaymentRecords />} />
               <Route path="manager-announcements" element={<AnnouncementManagement />} />
+              <Route path="my-projects" element={<ManagerProjects />} />
 
               {/* Shared */}
               <Route path="profile" element={<Profile />} />

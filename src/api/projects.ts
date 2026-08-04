@@ -11,6 +11,12 @@ export const getProject = async (id: number): Promise<Project> => {
   return data;
 };
 
+// Manager's own read-only project view — projects they manage, with rosters embedded.
+export const getMyProjects = async (): Promise<Project[]> => {
+  const { data } = await client.get('/project/mine');
+  return Array.isArray(data) ? data : [];
+};
+
 export const createProject = async (payload: Partial<Project>) => {
   const { data } = await client.post('/project', payload);
   return data;

@@ -99,6 +99,12 @@ const MANAGER_NAV: NavGroup[] = [
     ],
   },
   {
+    heading: 'Business',
+    items: [
+      { to: '/my-projects', label: 'Projects', icon: icons.project },
+    ],
+  },
+  {
     heading: 'Organization',
     items: [
       { to: '/departments', label: 'Departments', icon: icons.building },
