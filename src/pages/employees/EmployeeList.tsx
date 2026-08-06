@@ -6,6 +6,7 @@ import { getActiveUsers, getAllUsers, getExitedUsers, deleteUser, createUser, ac
 import { updatePersonalInfo } from '../../api/personalInfo';
 import { useAuth } from '../../contexts/AuthContext';
 import type { User } from '../../types';
+import { isValidMobile, isValidEmail, isValidDob } from '../../utils/validators';
 
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
@@ -21,8 +22,8 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
-function InputField({ label, value, onChange, type = 'text', required }: {
-  label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean;
+function InputField({ label, value, onChange, type = 'text', required, error, max }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean; error?: string; max?: string;
 }) {
   return (
     <div style={{ marginBottom: 16 }}>
@@ -32,10 +33,12 @@ function InputField({ label, value, onChange, type = 'text', required }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         required={required}
-        style={{ width: '100%', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px', color: '#111827', fontSize: 14, outline: 'none' }}
+        max={max}
+        style={{ width: '100%', background: '#F9FAFB', border: `1px solid ${error ? '#dc2626' : '#E5E7EB'}`, borderRadius: 8, padding: '9px 12px', color: '#111827', fontSize: 14, outline: 'none' }}
         onFocus={e => e.target.style.borderColor = '#f4b400'}
-        onBlur={e => e.target.style.borderColor = '#E5E7EB'}
+        onBlur={e => e.target.style.borderColor = error ? '#dc2626' : '#E5E7EB'}
       />
+      {error && <div style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>{error}</div>}
     </div>
   );
 }
@@ -54,6 +57,7 @@ export default function EmployeeList() {
   const [newEmp, setNewEmp] = useState({ fullname: '', username: '', password: '', jobTitle: '', role: 'ROLE_EMPLOYEE' });
   const [personalDetails, setPersonalDetails] = useState({ mobile: '', email: '', dob: '', gender: '', city: '', nomineeName: '', nomineeRelationship: '' });
   const [addError, setAddError] = useState('');
+  const [addFieldErrors, setAddFieldErrors] = useState<Record<string, string>>({});
 
   const [editEmp, setEditEmp] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({ fullname: '', jobTitle: '', role: 'ROLE_EMPLOYEE', active: 1, reportid: '' });
@@ -106,9 +110,21 @@ export default function EmployeeList() {
       setShowAdd(false);
       setNewEmp({ fullname: '', username: '', password: '', jobTitle: '', role: 'ROLE_EMPLOYEE' });
       setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '', nomineeName: '', nomineeRelationship: '' });
+      setAddFieldErrors({});
     },
     onError: (e: any) => setAddError(e.response?.data?.error || 'Failed to create employee'),
   });
+
+  const validateAddForm = () => {
+    const errors: Record<string, string> = {};
+    if (!newEmp.fullname.trim()) errors.fullname = 'Full name is required';
+    if (!newEmp.username.trim()) errors.username = 'Username is required';
+    if (personalDetails.mobile && !isValidMobile(personalDetails.mobile)) errors.mobile = 'Enter a valid 10-digit mobile number';
+    if (personalDetails.email && !isValidEmail(personalDetails.email)) errors.email = 'Enter a valid email address';
+    if (personalDetails.dob && !isValidDob(personalDetails.dob)) errors.dob = 'Enter a valid date, not in the future';
+    setAddFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const editMut = useMutation({
     mutationFn: () => updateUser(editEmp!.id, {
@@ -335,11 +351,11 @@ export default function EmployeeList() {
       )}
 
       {showAdd && (
-        <Modal title="Add New Employee" onClose={() => { setShowAdd(false); setAddError(''); setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '', nomineeName: '', nomineeRelationship: '' }); }}>
+        <Modal title="Add New Employee" onClose={() => { setShowAdd(false); setAddError(''); setAddFieldErrors({}); setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '', nomineeName: '', nomineeRelationship: '' }); }}>
           {addError && <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, padding: '10px 14px', color: '#dc2626', fontSize: 13, marginBottom: 16 }}>{addError}</div>}
-          <form onSubmit={e => { e.preventDefault(); setAddError(''); createMut.mutate(newEmp); }}>
-            <InputField label="Full Name" value={newEmp.fullname} onChange={v => setNewEmp(p => ({ ...p, fullname: v }))} required />
-            <InputField label="Username" value={newEmp.username} onChange={v => setNewEmp(p => ({ ...p, username: v }))} required />
+          <form onSubmit={e => { e.preventDefault(); setAddError(''); if (validateAddForm()) createMut.mutate(newEmp); }}>
+            <InputField label="Full Name" value={newEmp.fullname} onChange={v => setNewEmp(p => ({ ...p, fullname: v }))} required error={addFieldErrors.fullname} />
+            <InputField label="Username" value={newEmp.username} onChange={v => setNewEmp(p => ({ ...p, username: v }))} required error={addFieldErrors.username} />
             <InputField label="Password" type="password" value={newEmp.password} onChange={v => setNewEmp(p => ({ ...p, password: v }))} />
             <InputField label="Job Title" value={newEmp.jobTitle} onChange={v => setNewEmp(p => ({ ...p, jobTitle: v }))} />
             <div style={{ marginBottom: 20 }}>
@@ -360,11 +376,11 @@ export default function EmployeeList() {
                 Personal Details <span style={{ fontWeight: 400, textTransform: 'none', color: '#9CA3AF' }}>(optional — skip if employee will fill in app)</span>
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <InputField label="Mobile" value={personalDetails.mobile} onChange={v => setPersonalDetails(p => ({ ...p, mobile: v }))} />
-                <InputField label="Personal Email" value={personalDetails.email} onChange={v => setPersonalDetails(p => ({ ...p, email: v }))} />
+                <InputField label="Mobile" value={personalDetails.mobile} onChange={v => setPersonalDetails(p => ({ ...p, mobile: v }))} error={addFieldErrors.mobile} />
+                <InputField label="Personal Email" value={personalDetails.email} onChange={v => setPersonalDetails(p => ({ ...p, email: v }))} error={addFieldErrors.email} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <InputField label="Date of Birth (YYYY-MM-DD)" value={personalDetails.dob} onChange={v => setPersonalDetails(p => ({ ...p, dob: v }))} />
+                <InputField label="Date of Birth" type="date" max={new Date().toISOString().slice(0, 10)} value={personalDetails.dob} onChange={v => setPersonalDetails(p => ({ ...p, dob: v }))} error={addFieldErrors.dob} />
                 <InputField label="City" value={personalDetails.city} onChange={v => setPersonalDetails(p => ({ ...p, city: v }))} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
