@@ -9,7 +9,7 @@ type Tab = 'login' | 'register';
 export default function Login() {
   const [tab, setTab] = useState<Tab>('login');
 
-  // Login state with all the details
+  // Login state
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
