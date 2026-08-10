@@ -38,7 +38,8 @@
 |---|---|---|
 | `GET` | `/users` | List all users in the system |
 | `GET` | `/users/nullend` | List active users (end date is NULL) |
-| `GET` | `/users/notnull` | List terminated users (end date is set) |
+| `GET` | `/users/notnull` | List terminated users (end date is set ) |
+++++++
 | `PUT` | `/users/updateEndDate/:id` | Set a user's termination date |
 | `GET` | `/users/total` | Get total employee count |
 
