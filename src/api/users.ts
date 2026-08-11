@@ -31,6 +31,11 @@ export const getTotalUsers = async () => {
   return data;
 };
 
+export const getNextUserId = async (): Promise<number> => {
+  const { data } = await client.get('/users/maxid');
+  return data.nextid;
+};
+
 export const getUsersByDepartment = async (deptId: number): Promise<User[]> => {
   const { data } = await client.get(`/users/department/${deptId}`);
   return data;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Layout/Header';
-import { getActiveUsers, getAllUsers, getExitedUsers, deleteUser, createUser, activateUser, updateUser } from '../../api/users';
+import { getActiveUsers, getAllUsers, getExitedUsers, deleteUser, createUser, activateUser, updateUser, getNextUserId } from '../../api/users';
 import { updatePersonalInfo } from '../../api/personalInfo';
 import { useAuth } from '../../contexts/AuthContext';
 import type { User } from '../../types';
@@ -54,7 +54,7 @@ export default function EmployeeList() {
   const [tab, setTab] = useState<'active' | 'all' | 'exited'>('active');
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
-  const [newEmp, setNewEmp] = useState({ fullname: '', username: '', password: '', jobTitle: '', role: 'ROLE_EMPLOYEE' });
+  const [newEmp, setNewEmp] = useState({ fullname: '', password: '', jobTitle: '', role: 'ROLE_EMPLOYEE' });
   const [personalDetails, setPersonalDetails] = useState({ mobile: '', email: '', dob: '', gender: '', city: '', nomineeName: '', nomineeRelationship: '' });
   const [addError, setAddError] = useState('');
   const [addFieldErrors, setAddFieldErrors] = useState<Record<string, string>>({});
@@ -77,6 +77,9 @@ export default function EmployeeList() {
   });
   const { data: exitedUsers = [], isLoading: loadingExited } = useQuery({
     queryKey: ['users', 'exited', user?.id], queryFn: getExitedUsers, enabled: isAdminOrManager, retry: false,
+  });
+  const { data: nextUserId } = useQuery({
+    queryKey: ['users', 'nextId'], queryFn: getNextUserId, enabled: showAdd, retry: false,
   });
 
   const deleteMut = useMutation({
@@ -108,7 +111,7 @@ export default function EmployeeList() {
       }
       qc.invalidateQueries({ queryKey: ['users'] });
       setShowAdd(false);
-      setNewEmp({ fullname: '', username: '', password: '', jobTitle: '', role: 'ROLE_EMPLOYEE' });
+      setNewEmp({ fullname: '', password: '', jobTitle: '', role: 'ROLE_EMPLOYEE' });
       setPersonalDetails({ mobile: '', email: '', dob: '', gender: '', city: '', nomineeName: '', nomineeRelationship: '' });
       setAddFieldErrors({});
     },
@@ -118,7 +121,6 @@ export default function EmployeeList() {
   const validateAddForm = () => {
     const errors: Record<string, string> = {};
     if (!newEmp.fullname.trim()) errors.fullname = 'Full name is required';
-    if (!newEmp.username.trim()) errors.username = 'Username is required';
     if (personalDetails.mobile && !isValidMobile(personalDetails.mobile)) errors.mobile = 'Enter a valid 10-digit mobile number';
     if (personalDetails.email && !isValidEmail(personalDetails.email)) errors.email = 'Enter a valid email address';
     if (personalDetails.dob && !isValidDob(personalDetails.dob)) errors.dob = 'Enter a valid date, not in the future';
@@ -355,7 +357,17 @@ export default function EmployeeList() {
           {addError && <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, padding: '10px 14px', color: '#dc2626', fontSize: 13, marginBottom: 16 }}>{addError}</div>}
           <form onSubmit={e => { e.preventDefault(); setAddError(''); if (validateAddForm()) createMut.mutate(newEmp); }}>
             <InputField label="Full Name" value={newEmp.fullname} onChange={v => setNewEmp(p => ({ ...p, fullname: v }))} required error={addFieldErrors.fullname} />
-            <InputField label="Username" value={newEmp.username} onChange={v => setNewEmp(p => ({ ...p, username: v }))} required error={addFieldErrors.username} />
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>Username (Employee ID)</label>
+              <input
+                type="text"
+                value={nextUserId != null ? String(nextUserId) : 'Auto-generated'}
+                disabled
+                readOnly
+                style={{ width: '100%', background: '#F3F4F6', border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px', color: '#6B7280', fontSize: 14, cursor: 'not-allowed' }}
+              />
+              <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 4 }}>Auto-assigned as the next database ID — this is what the employee logs in with.</div>
+            </div>
             <InputField label="Password" type="password" value={newEmp.password} onChange={v => setNewEmp(p => ({ ...p, password: v }))} />
             <InputField label="Job Title" value={newEmp.jobTitle} onChange={v => setNewEmp(p => ({ ...p, jobTitle: v }))} />
             <div style={{ marginBottom: 20 }}>
