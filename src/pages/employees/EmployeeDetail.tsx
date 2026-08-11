@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Header from '../../components/Layout/Header';
 import { getUser, changePassword, adminResetPassword } from '../../api/users';
 import { getPersonalInfoByUser, updatePersonalInfo } from '../../api/personalInfo';
-import { getFinancialInfoByUser, updateFinancialInfo } from '../../api/financialInfo';
+import { getFinancialInfoByUser, updateFinancialInfo, createFinancialInfo } from '../../api/financialInfo';
 import { getAttendanceList, getDaysWorked } from '../../api/attendance';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -141,7 +141,13 @@ export default function EmployeeDetail() {
   });
 
   const updateFinancialMut = useMutation({
-    mutationFn: (payload: any) => updateFinancialInfo(empId, payload),
+    mutationFn: (payload: any) => {
+      const f = Array.isArray(financial) ? financial[0] : financial;
+      const hasExistingRecord = !!f && (f.salaryBasic != null || !!f.employmentType);
+      return hasExistingRecord
+        ? updateFinancialInfo(empId, payload)
+        : createFinancialInfo({ ...payload, userId: empId });
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['financial', empId] });
       setFinancialSaveMsg('Financial information saved successfully!');
