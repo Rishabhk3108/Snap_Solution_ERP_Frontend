@@ -64,7 +64,7 @@ export default function EmployeeDetail() {
     deductionProvidentFund: '', deductionProfessionalTax: '', deductionTax: '', deductionOther: '', deductionTotal: '',
     bankName: '', accountName: '', accountNumber: '', iban: '',
     panNumber: '', esicNumber: '', pfNumber: '',
-    otStatus: 'No', esicStatus: 'No',
+    otStatus: 'No', esicStatus: 'No', OtWorkingHours: '8',
   });
   const [financialEditing, setFinancialEditing] = useState(false);
   const [financialSaveMsg, setFinancialSaveMsg] = useState('');
@@ -125,6 +125,7 @@ export default function EmployeeDetail() {
         pfNumber: f.pfNumber ?? '',
         otStatus: f.otStatus ?? 'No',
         esicStatus: f.esicStatus ?? 'No',
+        OtWorkingHours: f.OtWorkingHours?.toString() ?? '8',
       });
     }
   }, [financial]);
@@ -343,62 +344,94 @@ export default function EmployeeDetail() {
 
               {!personalEditing ? (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 28px' }}>
-                  {([
-                    { key: 'dateOfBirth', label: 'Date of Birth' },
-                    { key: 'gender', label: 'Gender' },
-                    { key: 'maritalStatus', label: 'Marital Status' },
-                    { key: 'fatherName', label: "Father's Name" },
-                    { key: 'idNumber', label: 'ID Number' },
-                    { key: 'emailAddress', label: 'Email Address' },
-                    { key: 'mobile', label: 'Mobile' },
-                    { key: 'phone', label: 'Phone' },
-                    { key: 'address', label: 'Address' },
-                    { key: 'city', label: 'City' },
-                    { key: 'state', label: 'State' },
-                    { key: 'country', label: 'Country' },
-                    { key: 'nomineeName', label: 'Nominee Name' },
-                    { key: 'nomineeRelationship', label: 'Nominee Relationship' },
-                  ]).map(({ key, label }) => (
-                    <div key={key}>
-                      <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 3, fontWeight: 500 }}>{label}</div>
-                      <div style={{ fontSize: 14, color: (personalForm as any)[key] ? '#111827' : '#9CA3AF' }}>
-                        {(personalForm as any)[key] || '—'}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {([
+                      { key: 'dateOfBirth', label: 'Date of Birth' },
+                      { key: 'gender', label: 'Gender' },
+                      { key: 'maritalStatus', label: 'Marital Status' },
+                      { key: 'fatherName', label: "Father's Name" },
+                      { key: 'idNumber', label: 'ID Number' },
+                      { key: 'emailAddress', label: 'Email Address' },
+                      { key: 'mobile', label: 'Mobile' },
+                      { key: 'phone', label: 'Phone' },
+                    ]).map(({ key, label }) => (
+                      <div key={key}>
+                        <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 3, fontWeight: 500 }}>{label}</div>
+                        <div style={{ fontSize: 14, color: (personalForm as any)[key] ? '#111827' : '#9CA3AF' }}>
+                          {(personalForm as any)[key] || '—'}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {([
+                      { key: 'address', label: 'Address' },
+                      { key: 'city', label: 'City' },
+                      { key: 'state', label: 'State' },
+                      { key: 'country', label: 'Country' },
+                      { key: 'nomineeName', label: 'Nominee Name' },
+                      { key: 'nomineeRelationship', label: 'Nominee Relationship' },
+                    ]).map(({ key, label }) => (
+                      <div key={key}>
+                        <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 3, fontWeight: 500 }}>{label}</div>
+                        <div style={{ fontSize: 14, color: (personalForm as any)[key] ? '#111827' : '#9CA3AF' }}>
+                          {(personalForm as any)[key] || '—'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 28px' }}>
-                    {([
-                      { key: 'dateOfBirth', label: 'Date of Birth', type: 'date' },
-                      { key: 'gender', label: 'Gender', type: 'select', options: ['', 'Male', 'Female', 'Other'] },
-                      { key: 'maritalStatus', label: 'Marital Status', type: 'select', options: ['', 'Single', 'Married', 'Divorced', 'Widowed'] },
-                      { key: 'fatherName', label: "Father's Name", type: 'text' },
-                      { key: 'idNumber', label: 'ID Number', type: 'text' },
-                      { key: 'emailAddress', label: 'Email Address', type: 'email' },
-                      { key: 'mobile', label: 'Mobile', type: 'text' },
-                      { key: 'phone', label: 'Phone', type: 'text' },
-                      { key: 'address', label: 'Address', type: 'text' },
-                      { key: 'city', label: 'City', type: 'text' },
-                      { key: 'state', label: 'State', type: 'text' },
-                      { key: 'country', label: 'Country', type: 'text' },
-                      { key: 'nomineeName', label: 'Nominee Name *', type: 'text' },
-                      { key: 'nomineeRelationship', label: 'Nominee Relationship *', type: 'text' },
-                    ] as any[]).map(({ key, label, type, options }) => (
-                      <div key={key}>
-                        <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5, fontWeight: 500 }}>{label}</label>
-                        {type === 'select' ? (
-                          <select value={(personalForm as any)[key]} onChange={e => setPersonalForm(f => ({ ...f, [key]: e.target.value }))}
-                            style={{ ...inputSt }}>
-                            {options.map((o: string) => <option key={o} value={o}>{o || '— Select —'}</option>)}
-                          </select>
-                        ) : (
-                          <input type={type} value={(personalForm as any)[key]} onChange={e => setPersonalForm(f => ({ ...f, [key]: e.target.value }))}
-                            style={{ ...inputSt }} />
-                        )}
-                      </div>
-                    ))}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      {([
+                        { key: 'dateOfBirth', label: 'Date of Birth', type: 'date' },
+                        { key: 'gender', label: 'Gender', type: 'select', options: ['', 'Male', 'Female', 'Other'] },
+                        { key: 'maritalStatus', label: 'Marital Status', type: 'select', options: ['', 'Single', 'Married', 'Divorced', 'Widowed'] },
+                        { key: 'fatherName', label: "Father's Name", type: 'text' },
+                        { key: 'idNumber', label: 'ID Number', type: 'text' },
+                        { key: 'emailAddress', label: 'Email Address', type: 'email' },
+                        { key: 'mobile', label: 'Mobile', type: 'text' },
+                        { key: 'phone', label: 'Phone', type: 'text' },
+                      ] as any[]).map(({ key, label, type, options }) => (
+                        <div key={key}>
+                          <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5, fontWeight: 500 }}>{label}</label>
+                          {type === 'select' ? (
+                            <select value={(personalForm as any)[key]} onChange={e => setPersonalForm(f => ({ ...f, [key]: e.target.value }))}
+                              style={{ ...inputSt }}>
+                              {options.map((o: string) => <option key={o} value={o}>{o || '— Select —'}</option>)}
+                            </select>
+                          ) : (
+                            <input type={type} value={(personalForm as any)[key]} onChange={e => setPersonalForm(f => ({ ...f, [key]: e.target.value }))}
+                              style={{ ...inputSt }} />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      {([
+                        { key: 'address', label: 'Address', type: 'text' },
+                        { key: 'city', label: 'City', type: 'text' },
+                        { key: 'state', label: 'State', type: 'text' },
+                        { key: 'country', label: 'Country', type: 'text' },
+                        { key: 'nomineeName', label: 'Nominee Name *', type: 'text' },
+                        { key: 'nomineeRelationship', label: 'Nominee Relationship *', type: 'text' },
+                      ] as any[]).map(({ key, label, type, options }) => (
+                        <div key={key}>
+                          <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5, fontWeight: 500 }}>{label}</label>
+                          {type === 'select' ? (
+                            <select value={(personalForm as any)[key]} onChange={e => setPersonalForm(f => ({ ...f, [key]: e.target.value }))}
+                              style={{ ...inputSt }}>
+                              {options.map((o: string) => <option key={o} value={o}>{o || '— Select —'}</option>)}
+                            </select>
+                          ) : (
+                            <input type={type} value={(personalForm as any)[key]} onChange={e => setPersonalForm(f => ({ ...f, [key]: e.target.value }))}
+                              style={{ ...inputSt }} />
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
                     <button onClick={() => { setPersonalEditing(false); setPersonalSaveMsg(''); }}
@@ -508,46 +541,68 @@ export default function EmployeeDetail() {
                   ) : <div style={{ fontSize: 14, color: '#111827' }}>{(fin as any)?.[key] ?? '—'}</div>}
                 </div>
               );
+              const sectionLabel: React.CSSProperties = { margin: '0 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 };
               return (
                 <>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 28px' }}>
+                  {/* Row 1: core salary terms */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0 28px', paddingBottom: 20, marginBottom: 20, borderBottom: '1px solid #E5E7EB' }}>
                     <div>
-                      <p style={{ margin: '0 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Salary</p>
+                      <p style={sectionLabel}>Salary Details</p>
                       {sel('Employment Type', 'employmentType', ['Full Time', 'Part Time', 'Permanent', 'Contract', 'Intern'])}
-                      {inp('Basic Salary', 'salaryBasic', 'number')}
-                      {calcField('Gross Salary', 'salaryGross')}
-                      {calcField('Net Salary', 'salaryNet')}
                     </div>
                     <div>
-                      <p style={{ margin: '0 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Allowances</p>
+                      <p style={{ ...sectionLabel, opacity: 0 }}>&nbsp;</p>
+                      {inp('Basic Salary', 'salaryBasic', 'number')}
+                    </div>
+                    <div>
+                      <p style={{ ...sectionLabel, opacity: 0 }}>&nbsp;</p>
+                      {yesno('Overtime (OT)', 'otStatus')}
+                    </div>
+                    <div>
+                      <p style={{ ...sectionLabel, opacity: 0 }}>&nbsp;</p>
+                      {inp('Working Hours (OT)', 'OtWorkingHours', 'number')}
+                    </div>
+                  </div>
+
+                  {/* Row 2: inputs on the left, everything we calculate grouped on the right — visible together, no scrolling needed */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 28px' }}>
+                    <div>
+                      <p style={sectionLabel}>Allowances</p>
                       {inp('House Rent', 'allowanceHouseRent', 'number')}
                       {inp('Medical', 'allowanceMedical', 'number')}
                       {inp('Special', 'allowanceSpecial', 'number')}
                       {inp('Travelling', 'allowanceTravelling', 'number')}
                       {inp('Other', 'allowanceOther', 'number')}
-                      {calcField('Total Allowance', 'allowanceTotal')}
                     </div>
                     <div>
-                      <p style={{ margin: '16px 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Deductions</p>
+                      <p style={sectionLabel}>Deductions</p>
                       {inp('Provident Fund', 'deductionProvidentFund', 'number')}
                       {inp('Professional Tax', 'deductionProfessionalTax', 'number')}
                       {inp('Tax (TDS)', 'deductionTax', 'number')}
                       {inp('Other', 'deductionOther', 'number')}
-                      {calcField('Total Deduction', 'deductionTotal')}
                     </div>
                     <div>
-                      <p style={{ margin: '16px 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Bank Details</p>
+                      <p style={sectionLabel}>Total Salary Details</p>
+                      {calcField('Total Allowance', 'allowanceTotal')}
+                      {calcField('Total Deduction', 'deductionTotal')}
+                      {calcField('Gross Salary', 'salaryGross')}
+                      {calcField('Net Salary', 'salaryNet')}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 28px', marginTop: 20, paddingTop: 20, borderTop: '1px solid #E5E7EB' }}>
+                    <div>
+                      <p style={sectionLabel}>Bank Details</p>
                       {inp('Bank Name', 'bankName')}
                       {inp('Account Name', 'accountName')}
                       {inp('Account Number', 'accountNumber')}
                       {inp('IBAN', 'iban')}
                     </div>
                     <div>
-                      <p style={{ margin: '16px 0 12px', fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.8 }}>Statutory</p>
+                      <p style={sectionLabel}>Statutory</p>
                       {inp('PAN Number', 'panNumber')}
                       {inp('ESIC Number', 'esicNumber')}
                       {inp('PF Number', 'pfNumber')}
-                      {yesno('OT Status', 'otStatus')}
                       {yesno('ESIC Status', 'esicStatus')}
                     </div>
                   </div>
@@ -584,6 +639,7 @@ export default function EmployeeDetail() {
                           pfNumber: financialForm.pfNumber || undefined,
                           otStatus: financialForm.otStatus,
                           esicStatus: financialForm.esicStatus,
+                          OtWorkingHours: financialForm.OtWorkingHours ? Number(financialForm.OtWorkingHours) : undefined,
                         })}
                         disabled={updateFinancialMut.isPending}
                         style={{ background: '#f4b400', color: '#1f1f1f', border: 'none', borderRadius: 8, padding: '10px 28px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>

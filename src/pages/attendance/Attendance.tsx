@@ -50,14 +50,14 @@ export default function Attendance() {
   const [editMsg, setEditMsg] = useState('');
 
   const [newAtt, setNewAtt] = useState({
-    empid: '', projectId: '1', date: today,
+    empid: '', projectId: '', date: today,
     startTime: '09:00', endTime: '18:00', location: 'Office',
   });
   const [addMsg, setAddMsg] = useState('');
 
   const { data: todaySummary } = useQuery({ queryKey: ['attendance', 'today-summary', user?.id], queryFn: getTodaySummary, retry: 1 });
   const { data: activeUsers = [] } = useQuery({ queryKey: ['users', 'active', user?.id], queryFn: getActiveUsers, retry: 1 });
-  const { data: allProjects = [] } = useQuery({ queryKey: ['projects'], queryFn: getAllProjects, enabled: isAdmin, retry: false });
+  const { data: allProjects = [] } = useQuery({ queryKey: ['projects'], queryFn: getAllProjects, enabled: isAdminOrManager, retry: false });
 
   const filterQuery = useQuery({
     queryKey: ['attendance', 'filter', startDate, endDate, empFilter, projectFilter, user?.id],
@@ -332,7 +332,11 @@ export default function Attendance() {
               <form onSubmit={e => { e.preventDefault(); addMut.mutate(); }}>
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5, fontWeight: 500 }}>Employee *</label>
-                  <select value={newAtt.empid} onChange={e => setNewAtt(p => ({ ...p, empid: e.target.value }))} required
+                  <select value={newAtt.empid} onChange={e => {
+                    const empid = e.target.value;
+                    const selected = (activeUsers as any[]).find(u => String(u.id) === empid);
+                    setNewAtt(p => ({ ...p, empid, projectId: selected?.projectId ? String(selected.projectId) : '' }));
+                  }} required
                     style={{ width: '100%', ...inputStyle }}>
                     <option value="">Select employee…</option>
                     {(activeUsers as any[]).map((u: any) => <option key={u.id} value={u.id}>{u.fullname} ({u.id})</option>)}
@@ -342,8 +346,6 @@ export default function Attendance() {
                   { label: 'Date', key: 'date', type: 'date' },
                   { label: 'Start Time', key: 'startTime', type: 'time' },
                   { label: 'End Time', key: 'endTime', type: 'time' },
-                  { label: 'Project ID', key: 'projectId', type: 'number' },
-                  { label: 'Location', key: 'location', type: 'text' },
                 ].map(({ label, key, type }) => (
                   <div key={key} style={{ marginBottom: 14 }}>
                     <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5, fontWeight: 500 }}>{label}</label>
@@ -356,8 +358,44 @@ export default function Attendance() {
                     />
                   </div>
                 ))}
-                <button type="submit" disabled={addMut.isPending}
-                  style={{ width: '100%', background: '#f4b400', color: '#1f1f1f', border: 'none', borderRadius: 8, padding: '10px 0', fontSize: 14, fontWeight: 700, cursor: 'pointer', marginTop: 6 }}>
+                {(() => {
+                  const selectedEmp = (activeUsers as any[]).find(u => String(u.id) === newAtt.empid);
+                  const empHasProject = !!selectedEmp?.projectId;
+                  const empUnassigned = !!newAtt.empid && !empHasProject;
+                  return (
+                    <div style={{ marginBottom: 14 }}>
+                      <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5, fontWeight: 500 }}>Project *</label>
+                      <select value={empUnassigned ? '' : newAtt.projectId} onChange={e => setNewAtt(p => ({ ...p, projectId: e.target.value }))} required
+                        disabled={empHasProject || empUnassigned}
+                        style={{ width: '100%', ...inputStyle, ...(empHasProject || empUnassigned ? { background: '#F3F4F6', color: '#6B7280' } : {}) }}>
+                        <option value="">{empUnassigned ? 'Not assigned to any project' : 'Select project…'}</option>
+                        {!empUnassigned && (allProjects as any[]).map((p: any) => <option key={p.id} value={p.id}>{p.name} ({p.id})</option>)}
+                      </select>
+                      {empHasProject && (
+                        <p style={{ margin: '5px 0 0', fontSize: 11, color: '#9CA3AF' }}>
+                          This employee is assigned to this project — attendance can only be logged against it.
+                        </p>
+                      )}
+                      {empUnassigned && (
+                        <p style={{ margin: '5px 0 0', fontSize: 11, color: '#dc2626' }}>
+                          This employee isn't assigned to any project yet. Assign one in the Projects tab before logging attendance.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 5, fontWeight: 500 }}>Location</label>
+                  <input
+                    type="text"
+                    value={newAtt.location}
+                    onChange={e => setNewAtt(p => ({ ...p, location: e.target.value }))}
+                    required
+                    style={{ width: '100%', ...inputStyle }}
+                  />
+                </div>
+                <button type="submit" disabled={addMut.isPending || !newAtt.projectId}
+                  style={{ width: '100%', background: '#f4b400', color: '#1f1f1f', border: 'none', borderRadius: 8, padding: '10px 0', fontSize: 14, fontWeight: 700, cursor: 'pointer', marginTop: 6, opacity: (addMut.isPending || !newAtt.projectId) ? 0.6 : 1 }}>
                   {addMut.isPending ? 'Saving…' : 'Save Record'}
                 </button>
               </form>
